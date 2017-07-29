@@ -2,6 +2,7 @@
 """RainCloud Controller."""
 import raincloudy
 from .const import DAJAXICE_ENDPOINT, HEADERS
+from .helpers import find_attr
 
 
 class RainCloudyController(object):
@@ -89,3 +90,27 @@ class RainCloudyController(object):
     def update(self):
         """Update object."""
         self._get_cu_and_fu_status()
+
+    def _find_attr(self, key):
+        """Callback for find_attr method."""
+        return find_attr(self._attributes, key)
+
+    @property
+    def status(self):
+        """Return controller status."""
+        return self._find_attr('controller_online')
+
+    @property
+    def faucet_status(self):
+        """Return valve status."""
+        return self._find_attr('faucet_online')
+
+    @property
+    def current_time(self):
+        """Return controller current time."""
+        return self._find_attr('current_time')
+
+    @property
+    def faucet_battery(self):
+        """Return faucet battery."""
+        return self._find_attr('active_faucet_battery_level')

@@ -27,4 +27,22 @@ def serial_finder(data):
     except IndexError:
         raise "Could not find expression."
 
+
+def find_attr(data, key):
+    """
+    Find attribute based on a given key.
+    self._attributes has a dict list with objects
+    To acquire the current data, the dict must have ['cmd'] = 'as'
+    """
+    if not isinstance(data, list):
+        raise TypeError("Data must be a list.")
+
+    if not key.startswith('#'):
+        key = '#' + key
+
+    for member in data:
+        if member.get('cmd') == 'as' and member.get('id') == key:
+            return member.get('val')
+    return None
+
 # vim:sw=4:ts=4:et:
