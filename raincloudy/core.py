@@ -2,9 +2,9 @@
 """RainCloud."""
 import requests
 import urllib3
-from .const import (
-    INITIAL_DATA, DAJAXICE_ENDPOINT, HEADERS, LOGIN_ENDPOINT)
+from .const import INITIAL_DATA, HEADERS, LOGIN_ENDPOINT
 from .helpers import serial_finder
+from .controller import RainCloudyController
 
 
 class RainCloudy(object):
@@ -15,11 +15,17 @@ class RainCloudy(object):
         """
         Initialize RainCloud object.
 
-        :param str username: username to authenticate user
-        :param str passwrod: password to authenticate user
-        :param str http_proxy: HTTP proxy information (127.0.0.1:8080)
-        :param str https_proxy: HTTPs proxy information (127.0.0.1:8080)
-        :param bol ssl_warnings: Show SSL warnings. Defaults to False
+        :param username: username to authenticate user
+        :param passwrod: password to authenticate user
+        :param http_proxy: HTTP proxy information (127.0.0.1:8080)
+        :param https_proxy: HTTPs proxy information (127.0.0.1:8080)
+        :param ssl_warnings: Show SSL warnings. Defaults to False
+        :type username: string
+        :type password: string
+        :type http_proxy: string
+        :type https_proxy: string
+        :type ssl_warnings: boolean
+        :rtype: RainCloudy object
         """
         if not ssl_warnings:
             urllib3.disable_warnings()
@@ -29,8 +35,7 @@ class RainCloudy(object):
         self._password = password
 
         # initialize future attributes
-        self._attributes = None
-        self._devices = []
+        self.controllers = []
         self.client = None
 
         # set proxy environment
@@ -45,7 +50,7 @@ class RainCloudy(object):
     def __repr__(self):
         """Object representation."""
         return "<{0}: {1}>".format(self.__class__.__name__,
-                                   self.devices.get('controller_serial'))
+                                   self.controller.serial)
 
     def login(self):
         """Call login."""
@@ -64,7 +69,7 @@ class RainCloudy(object):
 
         # set headers to submit POST request
         token = INITIAL_DATA.copy()
-        token['csrfmiddlewaretoken'] = self._csrftoken
+        token['csrfmiddlewaretoken'] = self.csrftoken
         token['email'] = self._username
         token['password'] = self._password
 
@@ -75,58 +80,33 @@ class RainCloudy(object):
             req.raise_for_status()
 
         # populate device list
-        self._devices.append(serial_finder(req.text))
-        self.update()
-
+        parsed_controller = serial_finder(req.text)
+        self.controllers.append(
+            RainCloudyController(
+                self,
+                parsed_controller['controller_serial'],
+                parsed_controller['faucet_serial']
+            )
+        )
         return True
 
     @property
-    def _csrftoken(self):
+    def csrftoken(self):
         '''Return current csrftoken from request session.'''
         if self.client:
             return self.client.cookies.get('csrftoken')
         return None
 
-    def _get_cu_and_fu_status(self):
-        """Submit POST request to update self.device information."""
-
-        # adjust headers
-        headers = HEADERS.copy()
-        headers['Accept'] = '*/*'
-        headers['X-Requested-With'] = 'XMLHttpRequest'
-        headers['X-CSRFToken'] = self._csrftoken
-
-        # example {"controller_serial":"12345","faucet_serial":"abcd"}
-        argv = '{"controller_serial":"' + \
-               self.devices['controller_serial'] + \
-               '","faucet_serial":"' + \
-               self.devices['faucet_serial'] + \
-               '"}'
-
-        post_data = {'argv': argv}
-
-        req = self.client.post(DAJAXICE_ENDPOINT, stream=True, data=post_data,
-                               headers=headers, verify=False)
-
-        # token probably expired, then try again
-        if req.status_code == 403:
-            self.login()
-            self.update()
-        elif req.status_code == 200:
-            self._attributes = req.json()
-        else:
-            req.raise_for_status()
-
     def update(self):
-        """Update self._attributes object."""
-        self._get_cu_and_fu_status()
+        """Update controller._attributes."""
+        self.controller.update()
 
     @property
-    def devices(self):
-        """Show current linked devices."""
-        if len(self._devices) > 1:
-            return self._devices
-        return self._devices[0]
-
+    def controller(self):
+        """Show current linked controllers."""
+        if len(self.controllers) > 1:
+            # in the future, we should support more controllers
+            raise TypeError("Only one controller per account.")
+        return self.controllers[0]
 
 # vim:sw=4:ts=4:et:
