@@ -2,6 +2,7 @@
 """RainCloud."""
 import requests
 import urllib3
+from bs4 import BeautifulSoup
 from .const import INITIAL_DATA, HEADERS, LOGIN_ENDPOINT
 from .helpers import serial_finder
 from .controller import RainCloudyController
@@ -37,6 +38,7 @@ class RainCloudy(object):
         # initialize future attributes
         self.controllers = []
         self.client = None
+        self.htmlsoup = None
 
         # set proxy environment
         self._proxies = {
@@ -80,7 +82,8 @@ class RainCloudy(object):
             req.raise_for_status()
 
         # populate device list
-        parsed_controller = serial_finder(req.text)
+        self.htmlsoup = BeautifulSoup(req.text, 'html.parser')
+        parsed_controller = serial_finder(self.htmlsoup)
         self.controllers.append(
             RainCloudyController(
                 self,
