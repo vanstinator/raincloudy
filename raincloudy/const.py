@@ -26,4 +26,30 @@ INITIAL_DATA = {
     '_login': 'Login',
 }
 
+# structure used to manual operation like
+# enable faucet X with zone1 for 5 minutes
+MANUAL_OP_DATA = {
+    'csrfmiddlewaretoken': None,
+    'select_controller': None,
+    'select_faucet': None,
+
+    # manual operation
+    'zone1_select_manual_mode': None,
+    'zone2_select_manual_mode': None,
+    'zone3_select_manual_mode': None,
+    'zone4_select_manual_mode': None,
+
+    # rain delay - zone0 is not a typo.
+    'zone0_rain_delay_select': None,
+    'zone1_rain_delay_select': None,
+    'zone2_rain_delay_select': None,
+    'zone3_rain_delay_select': None,
+
+    # auto program toggle
+    'zone1_program_toggle': None,
+    'zone2_program_toggle': None,
+    'zone3_program_toggle': None,
+    'zone4_program_toggle': None,
+}
+
 # vim:sw=4:ts=4:et:
