@@ -18,7 +18,7 @@ RainCloudy is a library written in Python 2.7/3.x that manages the Melnor RainCl
 
 *Currently Melnor WifiAquaTimer not provide an official API. The results of this project are merely from reverse engineering.*
 
-Melnor RainCloud Youtube video: `https://goo.gl/Y5kx1X <https://goo.gl/Y5kx1X>`
+Melnor RainCloud Youtube video: `https://goo.gl/Y5kx1X`
 
 Usage
 -----
