@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """RainCloud Controller."""
 import raincloudy
-from .const import API_URL, DAJAXICE_ENDPOINT, HEADERS
+
+from bs4 import BeautifulSoup
+from .const import API_URL, DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT
 from .helpers import find_attr, find_program_status
 
 
@@ -18,6 +20,7 @@ class RainCloudyController(object):
         :type parent: RainCloudy object
         :type controller_id: string
         :type valve_id: string
+        :return: RainCloudyController object
         :rtype: RainCloudyController object
         """
 
@@ -62,7 +65,6 @@ class RainCloudyController(object):
 
     def _get_cu_and_fu_status(self):
         """Submit POST request to update information."""
-
         # adjust headers
         headers = HEADERS.copy()
         headers['Accept'] = '*/*'
@@ -87,9 +89,31 @@ class RainCloudyController(object):
         else:
             req.raise_for_status()
 
+    def _refresh_htmlsoup(self):
+        """
+        Function to refresh the self._parent.htmlsoup object
+        which provides the status if zones are scheduled to
+        start automatically (program_toggle).
+        """
+        req = self._parent.client.get(HOME_ENDPOINT, verify=False)
+        if req.status_code == 403:
+            self._parent.login()
+            self.update()
+        elif req.status_code == 200:
+            self._parent.htmlsoup = BeautifulSoup(req.text, 'html.parser')
+        else:
+            req.raise_for_status()
+
     def update(self):
-        """Update object."""
+        """
+        Call 2 methods to update zone attributes and htmlsoup object
+        """
+        # update zone attributes
         self._get_cu_and_fu_status()
+
+        # update self._parent.htmlsoup for gathering
+        # auto_watering status (program_toggle tag)
+        self._refresh_htmlsoup()
 
     def _find_attr(self, key):
         """Callback for find_attr method."""

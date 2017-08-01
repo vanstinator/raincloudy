@@ -8,7 +8,8 @@ def serial_finder(data):
     """
     Find controller serial and faucet_serial from the initial page.
 
-    :param str data: text to be parsed
+    :param data: text to be parsed
+    :type data: BeautilSoup object
     :return: a dict with controller_serial and faucet_serial
     :rtype: dict
     :raises IndexError: if controller_serial was not found on the data
@@ -35,6 +36,12 @@ def find_attr(data, key):
     Find attribute based on a given key.
     self._attributes has a dict list with objects
     To acquire the current data, the dict must have ['cmd'] = 'as'
+
+    :param data: list of BeautifulSoup objects
+    :param key: html object identifier
+    :return: html object value
+    :rtype: str
+    :raises TypeError: if data is not a list
     """
     if not isinstance(data, list):
         raise TypeError("Data must be a list.")
@@ -60,6 +67,13 @@ def find_program_status(data, zone):
     # expected result if disabled
     #<input class="switch" id="id_zone1_program_toggle" \
         name="zone1_program_toggle" onchange="submit()" type="checkbox"/>
+
+    :param data: BeautifulSoup object
+    :param zone: zone name from class='switch'
+    :return: boolean if zone has program enabled
+    :rtype: boolean
+    :raises TypeError: if data is not a BeautifulSoup object
+    :raises IndexError: if object not found
     """
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
@@ -71,7 +85,7 @@ def find_program_status(data, zone):
             if member.get('type') == 'checkbox' and \
                member.get('id') == zone_id:
                 return bool(member.has_attr('checked'))
-        return None
+        raise IndexError
     except IndexError:
         raise "Could not find expression."
 
