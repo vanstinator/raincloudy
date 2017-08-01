@@ -23,6 +23,7 @@ Usage
 -----
 
 .. code-block:: python
+
     from raincloudy.core import RainCloudy
     raincloudy = RainCloudy('username@domain', 'secret')
 
