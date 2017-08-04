@@ -6,7 +6,7 @@ from .const import (
     API_URL, DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
 from .helpers import (
     generate_soup_html, find_attr, find_controller_or_faucet_name,
-    find_program_status)
+    find_program_status, find_zone_name)
 
 
 class RainCloudyController(object):
@@ -288,12 +288,62 @@ class RainCloudyController(object):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone4')
 
+    def _set_zone_name(self, zone, name):
+        """Private method to override zone name."""
+        data = {
+            '_set_zone_name': 'Set Name',
+            'select_zone': str(zone),
+            'zone_name': name,
+        }
+        self._setup_post(data)
+
+    @property
+    def zone1_name(self):
+        """Return zone name."""
+        return find_zone_name(self._parent.html['home'], 1)
+
+    @zone1_name.setter
+    def zone1_name(self, value):
+        """Set a new zone name to faucet."""
+        self._set_zone_name(0, value)
+
+    @property
+    def zone2_name(self):
+        """Return zone name."""
+        return find_zone_name(self._parent.html['home'], 2)
+
+    @zone2_name.setter
+    def zone2_name(self, value):
+        """Set a new zone name to faucet."""
+        self._set_zone_name(1, value)
+
+    @property
+    def zone3_name(self):
+        """Return zone name."""
+        return find_zone_name(self._parent.html['home'], 3)
+
+    @zone3_name.setter
+    def zone3_name(self, value):
+        """Set a new zone name to faucet."""
+        self._set_zone_name(2, value)
+
+    @property
+    def zone4_name(self):
+        """Return zone name."""
+        return find_zone_name(self._parent.html['home'], 4)
+
+    @zone4_name.setter
+    def zone4_name(self, value):
+        """Set a new zone name to faucet."""
+        self._set_zone_name(3, value)
+
     @property
     def zone1(self):
         """Return status from zone."""
         return {
             'auto_watering': self.zone1_auto_watering,
             'droplet': self.zone1_droplet,
+            'name': self.zone1_name,
             'next_cycle': self.zone1_next_cycle,
             'rain_delay': self.zone1_rain_delay,
             'watering_time': self.zone1_watering_time,
@@ -305,6 +355,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone2_auto_watering,
             'droplet': self.zone2_droplet,
+            'name': self.zone2_name,
             'next_cycle': self.zone2_next_cycle,
             'rain_delay': self.zone2_rain_delay,
             'watering_time': self.zone2_watering_time,
@@ -316,6 +367,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone3_auto_watering,
             'droplet': self.zone3_droplet,
+            'name': self.zone3_name,
             'next_cycle': self.zone3_next_cycle,
             'rain_delay': self.zone3_rain_delay,
             'watering_time': self.zone3_watering_time,
@@ -327,6 +379,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone4_auto_watering,
             'droplet': self.zone4_droplet,
+            'name': self.zone4_name,
             'next_cycle': self.zone4_next_cycle,
             'rain_delay': self.zone4_rain_delay,
             'watering_time': self.zone4_watering_time,

@@ -130,4 +130,35 @@ def find_controller_or_faucet_name(data, p_type):
     except IndexError:
         return None
 
+
+def find_zone_name(data, zone_id):
+    """
+    Find on the HTML document the zone name.
+
+    # expected result
+    <span class="more_info" \
+        title="Zone can be renamed on Setup tab">1 - zone1</span>,
+
+    :param data: BeautifulSoup object
+    :param zone: zone id
+    :return: zone name
+    :rtype: string
+    :raises TypeError: if data is not a BeautifulSoup object
+    :raises IndexError: return None because controller name was not found
+    """
+    if not isinstance(data, BeautifulSoup):
+        raise TypeError("Function requires BeautilSoup HTML element.")
+
+    try:
+        table = data.find('table', {'class': 'zone_table'})
+        table_body = table.find('tbody')
+        rows = table_body.find_all('span', {'class': 'more_info'})
+        for row in rows:
+            if row.get_text().startswith(str(zone_id)):
+                return row.get_text()[4:].strip()
+        return None
+    except IndexError:
+        return None
+
+
 # vim:sw=4:ts=4:et:
