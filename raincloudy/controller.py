@@ -2,9 +2,10 @@
 """RainCloud Controller."""
 import raincloudy
 
-from bs4 import BeautifulSoup
-from .const import API_URL, DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT
-from .helpers import find_attr, find_program_status
+from .const import (
+    API_URL, DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
+from .helpers import (
+    generate_soup_html, find_attr, find_controller_name, find_program_status)
 
 
 class RainCloudyController(object):
@@ -63,6 +64,33 @@ class RainCloudyController(object):
         """Return valve ID."""
         return self.faucet_serial
 
+    def _setup_post(self, ddata):
+        """Method to update some attributes on /setup namespace."""
+        headers = HEADERS.copy()
+        headers['Referer'] = SETUP_ENDPOINT
+
+        # append csrftoken
+        ddata['csrfmiddlewaretoken'] = self._parent.csrftoken
+
+        req = self._parent.client.post(SETUP_ENDPOINT,
+                                       headers=headers, data=ddata)
+        if req.status_code == 200:
+            self.update()
+
+    @property
+    def name(self):
+        """Return controller name."""
+        return find_controller_name(self._parent.html['home'])
+
+    @name.setter
+    def name(self, value):
+        """Set a new name to controller."""
+        data = {
+            '_set_controller_name': 'Set Name',
+            'controller_name': value,
+        }
+        self._setup_post(data)
+
     def _get_cu_and_fu_status(self):
         """Submit POST request to update information."""
         # adjust headers
@@ -76,9 +104,9 @@ class RainCloudyController(object):
                '","faucet_serial":"' + self.faucet_serial + '"}'
         post_data = {'argv': argv}
 
-        req = self._parent.client.post(
-            DAJAXICE_ENDPOINT, stream=True, data=post_data,
-            headers=headers)
+        req = self._parent.client.post(DAJAXICE_ENDPOINT,
+                                       data=post_data,
+                                       headers=headers)
 
         # token probably expired, then try again
         if req.status_code == 403:
@@ -89,9 +117,9 @@ class RainCloudyController(object):
         else:
             req.raise_for_status()
 
-    def _refresh_htmlsoup(self):
+    def _refresh_html_home(self):
         """
-        Function to refresh the self._parent.htmlsoup object
+        Function to refresh the self._parent.html['home'] object
         which provides the status if zones are scheduled to
         start automatically (program_toggle).
         """
@@ -100,20 +128,20 @@ class RainCloudyController(object):
             self._parent.login()
             self.update()
         elif req.status_code == 200:
-            self._parent.htmlsoup = BeautifulSoup(req.text, 'html.parser')
+            self._parent.html['home'] = generate_soup_html(req.text)
         else:
             req.raise_for_status()
 
     def update(self):
         """
-        Call 2 methods to update zone attributes and htmlsoup object
+        Call 2 methods to update zone attributes and html['home'] object
         """
         # update zone attributes
         self._get_cu_and_fu_status()
 
-        # update self._parent.htmlsoup for gathering
+        # update self._parent.html['home'] for gathering
         # auto_watering status (program_toggle tag)
-        self._refresh_htmlsoup()
+        self._refresh_html_home()
 
     def _find_attr(self, key):
         """Callback for find_attr method."""
@@ -225,23 +253,22 @@ class RainCloudyController(object):
     @property
     def zone1_auto_watering(self):
         """Return if zone is configured to automatic watering."""
-        # NOTE to myself: when sending a POST, we need to update htmlsoup obj
-        return find_program_status(self._parent.htmlsoup, 'zone1')
+        return find_program_status(self._parent.html['home'], 'zone1')
 
     @property
     def zone2_auto_watering(self):
         """Return if zone is configured to automatic watering."""
-        return find_program_status(self._parent.htmlsoup, 'zone2')
+        return find_program_status(self._parent.html['home'], 'zone2')
 
     @property
     def zone3_auto_watering(self):
         """Return if zone is configured to automatic watering."""
-        return find_program_status(self._parent.htmlsoup, 'zone3')
+        return find_program_status(self._parent.html['home'], 'zone3')
 
     @property
     def zone4_auto_watering(self):
         """Return if zone is configured to automatic watering."""
-        return find_program_status(self._parent.htmlsoup, 'zone4')
+        return find_program_status(self._parent.html['home'], 'zone4')
 
     @property
     def zone1(self):

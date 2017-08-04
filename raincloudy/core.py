@@ -2,10 +2,9 @@
 """RainCloud."""
 import requests
 import urllib3
-from bs4 import BeautifulSoup
 from .const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
-from .helpers import serial_finder
+from .helpers import generate_soup_html, serial_finder
 from .controller import RainCloudyController
 
 
@@ -42,7 +41,12 @@ class RainCloudy(object):
         # initialize future attributes
         self.controllers = []
         self.client = None
-        self.htmlsoup = None
+        self.html = {
+            'home': None,
+            'setup': None,
+            'program': None,
+            'manage': None,
+        }
 
         # set proxy environment
         self._proxies = {
@@ -72,6 +76,7 @@ class RainCloudy(object):
         self.client = requests.Session()
         self.client.proxies = self._proxies
         self.client.verify = self._ssl_verify
+        self.client.stream = True
         self.client.get(LOGIN_ENDPOINT, headers=headers)
 
         # set headers to submit POST request
@@ -80,15 +85,14 @@ class RainCloudy(object):
         token['email'] = self._username
         token['password'] = self._password
 
-        req = self.client.post(LOGIN_ENDPOINT, stream=True,
-                               data=token, headers=HEADERS)
+        req = self.client.post(LOGIN_ENDPOINT, data=token, headers=HEADERS)
 
         if req.status_code != 302:
             req.raise_for_status()
 
         # populate device list
-        self.htmlsoup = BeautifulSoup(req.text, 'html.parser')
-        parsed_controller = serial_finder(self.htmlsoup)
+        self.html['home'] = generate_soup_html(req.text)
+        parsed_controller = serial_finder(self.html['home'])
         self.controllers.append(
             RainCloudyController(
                 self,
@@ -122,7 +126,7 @@ class RainCloudy(object):
 
     def logout(self):
         """Logout."""
-        req = self.client.get(LOGOUT_ENDPOINT)
+        self.client.get(LOGOUT_ENDPOINT)
         self._cleanup()
 
     def _cleanup(self):
