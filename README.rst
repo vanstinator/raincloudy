@@ -40,6 +40,12 @@ Usage
     raincloudy.controller.status
     'Online'
 
+    raincloudy.controller.name
+    'MelnorC001'
+
+    raincloudy.controller.faucet_name
+    'Backyard'
+
     raincloudy.controller.faucet_status
     'Online'
 
@@ -88,3 +94,10 @@ Usage
         'watering_time': 0
         }
     }
+
+
+Known issues
+------------
+
+- Currently only 1 (one) controller is supported.
+- Currently only 1 (one) valve unit is supported.

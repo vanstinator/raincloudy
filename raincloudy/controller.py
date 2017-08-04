@@ -5,7 +5,8 @@ import raincloudy
 from .const import (
     API_URL, DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
 from .helpers import (
-    generate_soup_html, find_attr, find_controller_name, find_program_status)
+    generate_soup_html, find_attr, find_controller_or_faucet_name,
+    find_program_status)
 
 
 class RainCloudyController(object):
@@ -80,7 +81,8 @@ class RainCloudyController(object):
     @property
     def name(self):
         """Return controller name."""
-        return find_controller_name(self._parent.html['home'])
+        return find_controller_or_faucet_name(self._parent.html['home'],
+                                              'controller')
 
     @name.setter
     def name(self, value):
@@ -156,6 +158,22 @@ class RainCloudyController(object):
     def faucet_status(self):
         """Return valve status."""
         return self._find_attr('faucet_online')
+
+    @property
+    def faucet_name(self):
+        """Return faucet name."""
+        return find_controller_or_faucet_name(self._parent.html['home'],
+                                              'faucet')
+
+    @faucet_name.setter
+    def faucet_name(self, value):
+        """Set a new name to faucet."""
+        data = {
+            '_set_faucet_name': 'Set Name',
+            'select_faucet': 0,
+            'faucet_name': value,
+        }
+        self._setup_post(data)
 
     @property
     def current_time(self):

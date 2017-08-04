@@ -98,7 +98,7 @@ def find_program_status(data, zone):
         raise "Could not find expression."
 
 
-def find_controller_name(data):
+def find_controller_or_faucet_name(data, p_type):
     """
     Find on the HTML document the controller name.
 
@@ -111,16 +111,21 @@ def find_controller_name(data):
           <option value="0" selected="selected">HERE_IS_CONTROLLER_NAME
 
     :param data: BeautifulSoup object
-    :return: controller name
-    :rtype: string. When not found
+    :param p_type: parameter type. (controller or faucet)
+    :return: controller or valve name
+    :rtype: string.
     :raises TypeError: if data is not a BeautifulSoup object
     :raises IndexError: return None because controller name was not found
     """
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
+    if not (p_type == 'controller' or p_type == 'faucet'):
+        raise TypeError("Function p_type must be controller or faucet")
+
     try:
-        child = data.find_all('select', {'id': 'id_select_controller'})[0]
+        search_field = 'id_select_{0}'.format(p_type)
+        child = data.find_all('select', {'id': search_field})[0]
         return child.get_text().strip()
     except IndexError:
         return None
