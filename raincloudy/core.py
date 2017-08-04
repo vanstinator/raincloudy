@@ -13,7 +13,7 @@ class RainCloudy(object):
     """RainCloudy object."""
 
     def __init__(self, username, password, http_proxy=None, https_proxy=None,
-                 ssl_warnings=False):
+                 ssl_warnings=True, ssl_verify=True):
         """
         Initialize RainCloud object.
 
@@ -21,14 +21,17 @@ class RainCloudy(object):
         :param passwrod: password to authenticate user
         :param http_proxy: HTTP proxy information (127.0.0.1:8080)
         :param https_proxy: HTTPs proxy information (127.0.0.1:8080)
-        :param ssl_warnings: Show SSL warnings. Defaults to False
+        :param ssl_warnings: Show SSL warnings
+        :param ssl_verify: Verify SSL server certificate
         :type username: string
         :type password: string
         :type http_proxy: string
         :type https_proxy: string
         :type ssl_warnings: boolean
+        :type ssl_verify: boolean
         :rtype: RainCloudy object
         """
+        self._ssl_verify = ssl_verify
         if not ssl_warnings:
             urllib3.disable_warnings()
 
@@ -68,7 +71,7 @@ class RainCloudy(object):
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.verify = False
+        self.client.verify = self._ssl_verify
         self.client.get(LOGIN_ENDPOINT, headers=headers)
 
         # set headers to submit POST request
@@ -77,8 +80,8 @@ class RainCloudy(object):
         token['email'] = self._username
         token['password'] = self._password
 
-        req = self.client.post(LOGIN_ENDPOINT, stream=True, data=token,
-                               headers=HEADERS, verify=False)
+        req = self.client.post(LOGIN_ENDPOINT, stream=True,
+                               data=token, headers=HEADERS)
 
         if req.status_code != 302:
             req.raise_for_status()
