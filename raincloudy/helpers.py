@@ -4,6 +4,14 @@ import re
 from bs4 import BeautifulSoup
 
 
+def generate_soup_html(data):
+    """Return an BeautifulSoup HTML parser document."""
+    try:
+        return BeautifulSoup(data, 'html.parser')
+    except:
+        raise
+
+
 def serial_finder(data):
     """
     Find controller serial and faucet_serial from the initial page.
@@ -88,5 +96,38 @@ def find_program_status(data, zone):
         raise IndexError
     except IndexError:
         raise "Could not find expression."
+
+
+def find_controller_or_faucet_name(data, p_type):
+    """
+    Find on the HTML document the controller name.
+
+    # expected result
+    <label for="select_controller">
+     <span class="more_info" id="#styling-type-light" data-hasqtip="26" \
+     title="Select Control Unit to display." >Control Unit:</span></label><br/>
+     <select class="simpleselect" id="id_select_controller" \
+       name="select_controller" onchange="submit()" >
+          <option value="0" selected="selected">HERE_IS_CONTROLLER_NAME
+
+    :param data: BeautifulSoup object
+    :param p_type: parameter type. (controller or faucet)
+    :return: controller or valve name
+    :rtype: string.
+    :raises TypeError: if data is not a BeautifulSoup object
+    :raises IndexError: return None because controller name was not found
+    """
+    if not isinstance(data, BeautifulSoup):
+        raise TypeError("Function requires BeautilSoup HTML element.")
+
+    if not (p_type == 'controller' or p_type == 'faucet'):
+        raise TypeError("Function p_type must be controller or faucet")
+
+    try:
+        search_field = 'id_select_{0}'.format(p_type)
+        child = data.find_all('select', {'id': search_field})[0]
+        return child.get_text().strip()
+    except IndexError:
+        return None
 
 # vim:sw=4:ts=4:et:

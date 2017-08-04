@@ -2,9 +2,9 @@
 """RainCloud."""
 import requests
 import urllib3
-from bs4 import BeautifulSoup
-from .const import INITIAL_DATA, HEADERS, LOGIN_ENDPOINT
-from .helpers import serial_finder
+from .const import (
+    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
+from .helpers import generate_soup_html, serial_finder
 from .controller import RainCloudyController
 
 
@@ -12,7 +12,7 @@ class RainCloudy(object):
     """RainCloudy object."""
 
     def __init__(self, username, password, http_proxy=None, https_proxy=None,
-                 ssl_warnings=False):
+                 ssl_warnings=True, ssl_verify=True):
         """
         Initialize RainCloud object.
 
@@ -20,14 +20,17 @@ class RainCloudy(object):
         :param passwrod: password to authenticate user
         :param http_proxy: HTTP proxy information (127.0.0.1:8080)
         :param https_proxy: HTTPs proxy information (127.0.0.1:8080)
-        :param ssl_warnings: Show SSL warnings. Defaults to False
+        :param ssl_warnings: Show SSL warnings
+        :param ssl_verify: Verify SSL server certificate
         :type username: string
         :type password: string
         :type http_proxy: string
         :type https_proxy: string
         :type ssl_warnings: boolean
+        :type ssl_verify: boolean
         :rtype: RainCloudy object
         """
+        self._ssl_verify = ssl_verify
         if not ssl_warnings:
             urllib3.disable_warnings()
 
@@ -38,7 +41,12 @@ class RainCloudy(object):
         # initialize future attributes
         self.controllers = []
         self.client = None
-        self.htmlsoup = None
+        self.html = {
+            'home': None,
+            'setup': None,
+            'program': None,
+            'manage': None,
+        }
 
         # set proxy environment
         self._proxies = {
@@ -67,7 +75,9 @@ class RainCloudy(object):
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.get(LOGIN_ENDPOINT, headers=headers, verify=False)
+        self.client.verify = self._ssl_verify
+        self.client.stream = True
+        self.client.get(LOGIN_ENDPOINT, headers=headers)
 
         # set headers to submit POST request
         token = INITIAL_DATA.copy()
@@ -75,15 +85,14 @@ class RainCloudy(object):
         token['email'] = self._username
         token['password'] = self._password
 
-        req = self.client.post(LOGIN_ENDPOINT, stream=True, data=token,
-                               headers=HEADERS, verify=False)
+        req = self.client.post(LOGIN_ENDPOINT, data=token, headers=HEADERS)
 
         if req.status_code != 302:
             req.raise_for_status()
 
         # populate device list
-        self.htmlsoup = BeautifulSoup(req.text, 'html.parser')
-        parsed_controller = serial_finder(self.htmlsoup)
+        self.html['home'] = generate_soup_html(req.text)
+        parsed_controller = serial_finder(self.html['home'])
         self.controllers.append(
             RainCloudyController(
                 self,
@@ -107,9 +116,22 @@ class RainCloudy(object):
     @property
     def controller(self):
         """Show current linked controllers."""
-        if len(self.controllers) > 1:
-            # in the future, we should support more controllers
-            raise TypeError("Only one controller per account.")
-        return self.controllers[0]
+        try:
+            if len(self.controllers) > 1:
+                # in the future, we should support more controllers
+                raise TypeError("Only one controller per account.")
+            return self.controllers[0]
+        except IndexError:
+            return None
+
+    def logout(self):
+        """Logout."""
+        self.client.get(LOGOUT_ENDPOINT)
+        self._cleanup()
+
+    def _cleanup(self):
+        """Cleanup object when logging out."""
+        self.client = None
+        self.controllers = []
 
 # vim:sw=4:ts=4:et:

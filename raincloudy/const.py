@@ -5,6 +5,10 @@ API_URL = 'https://wifiaquatimer.com'
 DAJAXICE_ENDPOINT = API_URL + '/dajaxice/webserver.get_cu_and_fu_status/'
 HOME_ENDPOINT = API_URL + '/home'
 LOGIN_ENDPOINT = API_URL + '/login/'
+SETUP_ENDPOINT = API_URL + '/setup/'
+PROGRAM_ENDPOINT = API_URL + '/program/'
+MANAGE_ENDPOINT = API_URL + '/manage/'
+LOGOUT_ENDPOINT = API_URL + '/logout'
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:54.0) \
