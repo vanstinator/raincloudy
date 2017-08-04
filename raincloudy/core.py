@@ -3,7 +3,8 @@
 import requests
 import urllib3
 from bs4 import BeautifulSoup
-from .const import INITIAL_DATA, HEADERS, LOGIN_ENDPOINT
+from .const import (
+    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
 from .helpers import serial_finder
 from .controller import RainCloudyController
 
@@ -67,7 +68,8 @@ class RainCloudy(object):
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.get(LOGIN_ENDPOINT, headers=headers, verify=False)
+        self.client.verify = False
+        self.client.get(LOGIN_ENDPOINT, headers=headers)
 
         # set headers to submit POST request
         token = INITIAL_DATA.copy()
@@ -107,9 +109,22 @@ class RainCloudy(object):
     @property
     def controller(self):
         """Show current linked controllers."""
-        if len(self.controllers) > 1:
-            # in the future, we should support more controllers
-            raise TypeError("Only one controller per account.")
-        return self.controllers[0]
+        try:
+            if len(self.controllers) > 1:
+                # in the future, we should support more controllers
+                raise TypeError("Only one controller per account.")
+            return self.controllers[0]
+        except IndexError:
+            return None
+
+    def logout(self):
+        """Logout."""
+        req = self.client.get(LOGOUT_ENDPOINT)
+        self._cleanup()
+
+    def _cleanup(self):
+        """Cleanup object when logging out."""
+        self.client = None
+        self.controllers = []
 
 # vim:sw=4:ts=4:et:

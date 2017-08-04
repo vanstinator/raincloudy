@@ -78,7 +78,7 @@ class RainCloudyController(object):
 
         req = self._parent.client.post(
             DAJAXICE_ENDPOINT, stream=True, data=post_data,
-            headers=headers, verify=False)
+            headers=headers)
 
         # token probably expired, then try again
         if req.status_code == 403:
@@ -95,7 +95,7 @@ class RainCloudyController(object):
         which provides the status if zones are scheduled to
         start automatically (program_toggle).
         """
-        req = self._parent.client.get(HOME_ENDPOINT, verify=False)
+        req = self._parent.client.get(HOME_ENDPOINT)
         if req.status_code == 403:
             self._parent.login()
             self.update()
