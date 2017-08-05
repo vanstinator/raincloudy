@@ -288,6 +288,26 @@ class RainCloudyController(object):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone4')
 
+    @property
+    def zone1_is_watering(self):
+        """Return boolean if zone is watering."""
+        return bool(self.zone1_watering_time > 0)
+
+    @property
+    def zone2_is_watering(self):
+        """Return boolean if zone is watering."""
+        return bool(self.zone2_watering_time > 0)
+
+    @property
+    def zone3_is_watering(self):
+        """Return boolean if zone is watering."""
+        return bool(self.zone3_watering_time > 0)
+
+    @property
+    def zone4_is_watering(self):
+        """Return boolean if zone is watering."""
+        return bool(self.zone4_watering_time > 0)
+
     def _set_zone_name(self, zone, name):
         """Private method to override zone name."""
         data = {
@@ -343,6 +363,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone1_auto_watering,
             'droplet': self.zone1_droplet,
+            'is_watering': self.zone1_is_watering,
             'name': self.zone1_name,
             'next_cycle': self.zone1_next_cycle,
             'rain_delay': self.zone1_rain_delay,
@@ -355,6 +376,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone2_auto_watering,
             'droplet': self.zone2_droplet,
+            'is_watering': self.zone2_is_watering,
             'name': self.zone2_name,
             'next_cycle': self.zone2_next_cycle,
             'rain_delay': self.zone2_rain_delay,
@@ -367,6 +389,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone3_auto_watering,
             'droplet': self.zone3_droplet,
+            'is_watering': self.zone3_is_watering,
             'name': self.zone3_name,
             'next_cycle': self.zone3_next_cycle,
             'rain_delay': self.zone3_rain_delay,
@@ -379,6 +402,7 @@ class RainCloudyController(object):
         return {
             'auto_watering': self.zone4_auto_watering,
             'droplet': self.zone4_droplet,
+            'is_watering': self.zone4_is_watering,
             'name': self.zone4_name,
             'next_cycle': self.zone4_next_cycle,
             'rain_delay': self.zone4_rain_delay,
