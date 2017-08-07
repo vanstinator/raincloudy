@@ -10,6 +10,10 @@ PROGRAM_ENDPOINT = API_URL + '/program/'
 MANAGE_ENDPOINT = API_URL + '/manage/'
 LOGOUT_ENDPOINT = API_URL + '/logout'
 
+
+# minutes maximum water running
+MAX_MINUTES = 60
+
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:54.0) \
                   Gecko/20100101 Firefox/54.0',

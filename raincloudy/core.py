@@ -2,10 +2,10 @@
 """RainCloud."""
 import requests
 import urllib3
-from .const import (
+from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
-from .helpers import generate_soup_html, serial_finder
-from .controller import RainCloudyController
+from raincloudy.helpers import generate_soup_html, serial_finder
+from raincloudy.controller import RainCloudyController
 
 
 class RainCloudy(object):
@@ -92,6 +92,9 @@ class RainCloudy(object):
 
         # populate device list
         self.html['home'] = generate_soup_html(req.text)
+
+        # currently only one faucet is supported on the code
+        # we have future plans to support it
         parsed_controller = serial_finder(self.html['home'])
         self.controllers.append(
             RainCloudyController(

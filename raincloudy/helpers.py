@@ -33,7 +33,14 @@ def serial_finder(data):
 
         # pylint: disable=line-too-long
         regex = re.compile(r"controller_serial':\s*'(?P<controller_serial>\w*)',\s*'faucet_serial':\s*'(?P<faucet_serial>\w*)'") # noqa
-        return regex.search(child.string).groupdict()
+        result = regex.search(child.string).groupdict()
+
+        # currently only one faucet is supported on the code
+        # we have plans to support it in the future
+        parsed_dict = {}
+        parsed_dict['controller_serial'] = result['controller_serial']
+        parsed_dict['faucet_serial'] = [result['faucet_serial']]
+        return parsed_dict
 
     except IndexError:
         raise "Could not find expression."
