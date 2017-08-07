@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """RainCloud Faucet."""
-from raincloudy.const import API_URL
+from raincloudy.const import API_URL, HOME_ENDPOINT, MANUAL_OP_DATA
 from raincloudy.helpers import (
     find_controller_or_faucet_name,
     find_program_status, find_zone_name)
@@ -314,8 +314,52 @@ class RainCloudyFaucet(object):
     def zones(self):
         """Return a dict from all zones status."""
         zones = {}
-        zones['zone1'] = self.zone1
-        zones['zone2'] = self.zone2
-        zones['zone3'] = self.zone3
-        zones['zone4'] = self.zone4
+        for zone in range(1, 5):
+            attr = 'zone{0}'.format(zone)
+            zones[attr] = getattr(self, attr)
         return zones
+
+    def prepare_update(self, force_refresh=True):
+        """Return a dict with all current options prior submitting request."""
+        ddata = MANUAL_OP_DATA.copy()
+
+        # force update to make sure status is accurate
+        if force_refresh:
+            self.update()
+
+        # select current controller and faucet
+        ddata['select_controller'] = \
+            self._parent.controllers.index(self._controller)
+        ddata['select_faucet'] = self._controller.faucets.index(self)
+
+        # check if zone is scheduled automatically (zone1_program_toggle)
+        for zone in range(1, 5):
+            attr = 'zone{}_program_toggle'.format(zone)
+            attr_opt = 'zone{}_auto_watering'.format(zone)
+            if getattr(self, attr_opt) and attr in ddata.keys():
+                ddata[attr] = 'on'
+
+        # check if zone current watering manually (zone1_select_manual_mode)
+        for zone in range(1, 5):
+            attr = 'zone{}_select_manual_mode'.format(zone)
+            attr_opt = 'zone{}_watering_time'.format(zone)
+            if bool(getattr(self, attr_opt)) and attr in ddata.keys():
+                ddata[attr] = getattr(self, attr_opt)
+
+        # check if rain delay is selected (zone0_rain_delay_select)
+        for zone in range(0, 4):
+            attr = 'zone{}_rain_delay_select'.format(zone)
+            attr_opt = 'zone{}_rain_delay'.format(zone + 1)
+            value = getattr(self, attr_opt)
+            if value and attr in ddata.keys():
+                if int(value) >= 2 and int(value) <= 7:
+                    value = str(value) + 'days'
+                else:
+                    value = str(value) + 'day'
+                ddata[attr] = value
+
+        return ddata
+
+    def submit(self, ddata):
+        """Post data."""
+        self._controller.setup_post(ddata, referer=HOME_ENDPOINT)

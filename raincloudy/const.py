@@ -10,9 +10,7 @@ PROGRAM_ENDPOINT = API_URL + '/program/'
 MANAGE_ENDPOINT = API_URL + '/manage/'
 LOGOUT_ENDPOINT = API_URL + '/logout'
 
-
-# minutes maximum water running
-MAX_MINUTES = 60
+MAX_WATERING_MINUTES = 60
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:54.0) \
@@ -37,27 +35,26 @@ INITIAL_DATA = {
 # structure used to manual operation like
 # enable faucet X with zone1 for 5 minutes
 MANUAL_OP_DATA = {
-    'csrfmiddlewaretoken': None,
     'select_controller': None,
     'select_faucet': None,
 
     # manual operation
-    'zone1_select_manual_mode': None,
-    'zone2_select_manual_mode': None,
-    'zone3_select_manual_mode': None,
-    'zone4_select_manual_mode': None,
+    'zone1_select_manual_mode': 'OFF',
+    'zone2_select_manual_mode': 'OFF',
+    'zone3_select_manual_mode': 'OFF',
+    'zone4_select_manual_mode': 'OFF',
 
     # rain delay - zone0 is not a typo.
-    'zone0_rain_delay_select': None,
-    'zone1_rain_delay_select': None,
-    'zone2_rain_delay_select': None,
-    'zone3_rain_delay_select': None,
+    'zone0_rain_delay_select': 'off',
+    'zone1_rain_delay_select': 'off',
+    'zone2_rain_delay_select': 'off',
+    'zone3_rain_delay_select': 'off',
 
     # auto program toggle
-    'zone1_program_toggle': None,
-    'zone2_program_toggle': None,
-    'zone3_program_toggle': None,
-    'zone4_program_toggle': None,
+    'zone1_program_toggle': 'off',
+    'zone2_program_toggle': 'off',
+    'zone3_program_toggle': 'off',
+    'zone4_program_toggle': 'off',
 }
 
 # vim:sw=4:ts=4:et:
