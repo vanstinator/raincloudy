@@ -1,2 +1,1 @@
-"""Base RainCloudy module."""
-from .core import RainCloudy # noqa
+"""Init file for RainCloudy module."""

@@ -43,18 +43,18 @@ Usage
     raincloudy.controller.name
     'MelnorC001'
 
-    raincloudy.controller.faucet_name
+    raincloudy.controller.faucet.name
     'Backyard'
 
-    raincloudy.controller.faucet_status
+    raincloudy.controller.faucet.status
     'Online'
 
-    # controlled total zones
-    len(raincloudy.controller.zones)
+    # 4 zones controlled per faucet
+    len(raincloudy.controller.faucet.zones)
     4
 
     # show details from zone1
-    raincloudy.controller.zone1
+    raincloudy.controller.faucet.zone1
     {'auto_watering': True,
      'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
      'next_cycle': 'Delayed',
@@ -62,42 +62,64 @@ Usage
      'watering_time': 0}
 
      # update attributes and show all zones
-     raincloudy.update()
-     raincloudy.controller.zones
+     raincloudy.controller.update()
+     raincloudy.controller.faucet.zones
      {
         'zone1': {
             'auto_watering': True,
             'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
+            'is_watering': False,
             'next_cycle': 'Delayed',
+            'name': 'Backyard Flowers',
             'rain_delay': 1,
             'watering_time': 0
         },
         'zone2': {
             'auto_watering': True,
             'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
+            'is_watering': False,
             'next_cycle': 'Delayed',
+            'name': 'Tree Patio',
             'rain_delay': 2,
             'watering_time': 0
         },
         'zone3': {
             'auto_watering': True,
             'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
+            'is_watering': False,
             'next_cycle': '3:17 AM',
+            'name': 'Grass Backyard',
             'rain_delay': 0,
             'watering_time': 0
         },
         'zone4': {
             'auto_watering': True,
             'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
+            'is_watering': False,
             'next_cycle': '4:00 AM',
+            'name': 'Grass Front yard',
             'rain_delay': 0,
-        'watering_time': 0
+            'watering_time': 0
         }
     }
 
 
-Known issues
-------------
+    # set faucet name
+    raincloudy.controller.faucet.name = 'Outside Left'
+    raincloudy.controller.faucet.name
+    'Outside Left'
 
-- Currently only 1 (one) controller is supported.
-- Currently only 1 (one) valve unit is supported.
+    # enable automatic program for zone1
+    raincloudy.controller.faucet.zone1_auto_watering = True
+
+    # run water for 15 minutes on zone3
+    raincloudy.controller.faucet.zone3_watering_time = 15
+
+    # set rain delay for 2 days on zone2
+    raincloudy.controller.faucet.zone2_rain_delay = 2
+
+
+Current Limitations
+------------
+- Only 1 (one) controller is supported.
+- Only 1 (one) valve unit is supported.
