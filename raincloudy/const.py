@@ -10,8 +10,10 @@ PROGRAM_ENDPOINT = API_URL + '/program/'
 MANAGE_ENDPOINT = API_URL + '/manage/'
 LOGOUT_ENDPOINT = API_URL + '/logout'
 
-WATERING_VALID_VALUES = ['on', 'ON', 'off', 'OFF', 0, 5, 10, 15, 30, 45, 60]
+MAX_RAIN_DELAY_DAYS = 7
 MAX_WATERING_MINUTES = 60
+MANUAL_WATERING_ALLOWED = \
+    ['on', 'ON', 'off', 'OFF', 0, 5, 10, 15, 30, 45, 60]
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:54.0) \

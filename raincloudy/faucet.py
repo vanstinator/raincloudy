@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """RainCloud Faucet."""
 from raincloudy.const import (
-    API_URL, HOME_ENDPOINT, MANUAL_OP_DATA, MAX_WATERING_MINUTES,
-    WATERING_VALID_VALUES)
+    API_URL, HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
+    MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES)
 from raincloudy.helpers import (
     find_controller_or_faucet_name,
     find_program_status, find_zone_name)
@@ -90,10 +90,10 @@ class RainCloudyFaucet(object):
 
     def _set_watering_time(self, zoneid, value):
         """Generic method to set watering_time per zone."""
-        if value not in WATERING_VALID_VALUES:
+        if value not in MANUAL_WATERING_ALLOWED:
             raise ValueError(
                 'Valid options are: {}'.format(
-                    ', '.join(map(str, WATERING_VALID_VALUES)))
+                    ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
             )
 
         if isinstance(value, int) and value == 0:
@@ -171,25 +171,73 @@ class RainCloudyFaucet(object):
         """Return droplet URL from zone"""
         return "{0}{1}".format(API_URL, self._lookup_attr('droplet_zone_3'))
 
+    def _set_rain_delay(self, zoneid, value):
+        """Generic method to set auto_watering program."""
+        # current index for rain_delay starts in 0
+        zoneid -= 1
+
+        try:
+            if isinstance(value, int):
+                if value > MAX_RAIN_DELAY_DAYS or value < 0:
+                    raise ValueError
+                elif value == 0:
+                    value = 'off'
+                elif value == 1:
+                    value = '1day'
+                elif value >= 2:
+                    value = str(value) + 'days'
+            elif isinstance(value, str):
+                if value.lower() != 'off':
+                    raise ValueError
+        except ValueError:
+            print('Value must be "off" or a number smaller than {}'.format(
+                MAX_RAIN_DELAY_DAYS))
+            return
+
+        ddata = self.preupdate()
+        attr = 'zone{}_rain_delay_select'.format(zoneid)
+        ddata[attr] = value
+        self.submit_action(ddata)
+
     @property
     def zone1_rain_delay(self):
         """Return the rain delay day from zone."""
         return self._lookup_attr('id_zone1_rain_delay_select')
+
+    @zone1_rain_delay.setter
+    def zone1_rain_delay(self, value):
+        """Set number of rain delay days for zone."""
+        return self._set_rain_delay(1, value)
 
     @property
     def zone2_rain_delay(self):
         """Return the rain delay day from zone."""
         return self._lookup_attr('id_zone2_rain_delay_select')
 
+    @zone2_rain_delay.setter
+    def zone2_rain_delay(self, value):
+        """Set number of rain delay days for zone."""
+        return self._set_rain_delay(2, value)
+
     @property
     def zone3_rain_delay(self):
         """Return the rain delay day from zone."""
         return self._lookup_attr('id_zone3_rain_delay_select')
 
+    @zone3_rain_delay.setter
+    def zone3_rain_delay(self, value):
+        """Set number of rain delay days for zone."""
+        return self._set_rain_delay(3, value)
+
     @property
     def zone4_rain_delay(self):
         """Return the rain delay day from zone."""
         return self._lookup_attr('id_zone4_rain_delay_select')
+
+    @zone4_rain_delay.setter
+    def zone4_rain_delay(self, value):
+        """Set number of rain delay days for zone."""
+        return self._set_rain_delay(4, value)
 
     @property
     def zone1_next_cycle(self):
@@ -211,25 +259,61 @@ class RainCloudyFaucet(object):
         """Return the time scheduled for next watering from zone."""
         return self._lookup_attr('zone_3_countdown_time')
 
+    def _set_auto_watering(self, zoneid, value):
+        """Generic method to set auto_watering program."""
+        if not isinstance(value, bool):
+            raise ValueError('Must be a boolean')
+
+        ddata = self.preupdate()
+        attr = 'zone{}_program_toggle'.format(zoneid)
+        try:
+            if not value:
+                ddata.pop(attr)
+            else:
+                ddata[attr] = 'on'
+        except KeyError:
+            pass
+        self.submit_action(ddata)
+
     @property
     def zone1_auto_watering(self):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone1')
+
+    @zone1_auto_watering.setter
+    def zone1_auto_watering(self, value):
+        """Enable/disable zone auto_watering program."""
+        return self._set_auto_watering(1, bool(value))
 
     @property
     def zone2_auto_watering(self):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone2')
 
+    @zone2_auto_watering.setter
+    def zone2_auto_watering(self, value):
+        """Enable/disable zone auto_watering program."""
+        return self._set_auto_watering(2, bool(value))
+
     @property
     def zone3_auto_watering(self):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone3')
 
+    @zone3_auto_watering.setter
+    def zone3_auto_watering(self, value):
+        """Enable/disable zone auto_watering program."""
+        return self._set_auto_watering(3, bool(value))
+
     @property
     def zone4_auto_watering(self):
         """Return if zone is configured to automatic watering."""
         return find_program_status(self._parent.html['home'], 'zone4')
+
+    @zone4_auto_watering.setter
+    def zone4_auto_watering(self, value):
+        """Enable/disable zone auto_watering program."""
+        return self._set_auto_watering(4, bool(value))
 
     @property
     def zone1_is_watering(self):
