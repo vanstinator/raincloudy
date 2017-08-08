@@ -10,6 +10,7 @@ PROGRAM_ENDPOINT = API_URL + '/program/'
 MANAGE_ENDPOINT = API_URL + '/manage/'
 LOGOUT_ENDPOINT = API_URL + '/logout'
 
+WATERING_VALID_VALUES = ['on', 'ON', 'off', 'OFF', 0, 5, 10, 15, 30, 45, 60]
 MAX_WATERING_MINUTES = 60
 
 HEADERS = {
@@ -49,12 +50,6 @@ MANUAL_OP_DATA = {
     'zone1_rain_delay_select': 'off',
     'zone2_rain_delay_select': 'off',
     'zone3_rain_delay_select': 'off',
-
-    # auto program toggle
-    'zone1_program_toggle': 'off',
-    'zone2_program_toggle': 'off',
-    'zone3_program_toggle': 'off',
-    'zone4_program_toggle': 'off',
 }
 
 # vim:sw=4:ts=4:et:

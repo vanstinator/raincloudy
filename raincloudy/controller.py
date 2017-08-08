@@ -57,11 +57,11 @@ class RainCloudyController(object):
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
-    def setup_post(self, ddata, referer=None):
-        """Method to update some attributes on /setup namespace."""
+    def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
+        """Method to update some attributes on namespace."""
         headers = HEADERS.copy()
         if referer is None:
-            headers['Referer'] = SETUP_ENDPOINT
+            headers.pop('Referer')
         else:
             headers['Referer'] = referer
 
@@ -69,8 +69,7 @@ class RainCloudyController(object):
         if 'csrfmiddlewaretoken' not in ddata.keys():
             ddata['csrfmiddlewaretoken'] = self._parent.csrftoken
 
-        req = self._parent.client.post(SETUP_ENDPOINT,
-                                       headers=headers, data=ddata)
+        req = self._parent.client.post(url, headers=headers, data=ddata)
         if req.status_code == 200:
             self.update()
 
@@ -155,7 +154,7 @@ class RainCloudyController(object):
             '_set_controller_name': 'Set Name',
             'controller_name': value,
         }
-        self.setup_post(data)
+        self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
 
     @property
     def status(self):

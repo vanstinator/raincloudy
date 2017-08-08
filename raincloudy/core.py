@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""RainCloud."""
+"""RainCloudy core object."""
 import requests
 import urllib3
 from raincloudy.const import (

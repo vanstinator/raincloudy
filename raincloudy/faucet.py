@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """RainCloud Faucet."""
-from raincloudy.const import API_URL, HOME_ENDPOINT, MANUAL_OP_DATA
+from raincloudy.const import (
+    API_URL, HOME_ENDPOINT, MANUAL_OP_DATA, MAX_WATERING_MINUTES,
+    WATERING_VALID_VALUES)
 from raincloudy.helpers import (
     find_controller_or_faucet_name,
     find_program_status, find_zone_name)
@@ -70,7 +72,7 @@ class RainCloudyFaucet(object):
             'select_faucet': 0,
             'faucet_name': value,
         }
-        self._controller.setup_post(data)
+        self._controller.post(data)
 
     @property
     def status(self):
@@ -86,6 +88,26 @@ class RainCloudyFaucet(object):
         """Callback self._controller.update()."""
         self._controller.update()
 
+    def _set_watering_time(self, zoneid, value):
+        """Generic method to set watering_time per zone."""
+        if value not in WATERING_VALID_VALUES:
+            raise ValueError(
+                'Valid options are: {}'.format(
+                    ', '.join(map(str, WATERING_VALID_VALUES)))
+            )
+
+        if isinstance(value, int) and value == 0:
+            value = 'OFF'
+        elif isinstance(value, str):
+            value = value.upper()
+            if value == 'ON':
+                value = MAX_WATERING_MINUTES
+
+        ddata = self.preupdate()
+        attr = 'zone{}_select_manual_mode'.format(zoneid)
+        ddata[attr] = value
+        self.submit_action(ddata)
+
     # some fields on the backend refers to zone0 as zone1 as well
     # to keep it cohenret and since the frontend refers to zone1
     # we will call it publicly as zone1
@@ -94,20 +116,40 @@ class RainCloudyFaucet(object):
         """Return watering_time from zone."""
         return self._lookup_attr('zone_0_watering_time')
 
+    @zone1_watering_time.setter
+    def zone1_watering_time(self, value):
+        """Manually turn on water for X minutes."""
+        return self._set_watering_time(1, value)
+
     @property
     def zone2_watering_time(self):
         """Return watering_time from zone."""
         return self._lookup_attr('zone_1_watering_time')
+
+    @zone2_watering_time.setter
+    def zone2_watering_time(self, value):
+        """Manually turn on water for X minutes."""
+        return self._set_watering_time(2, value)
 
     @property
     def zone3_watering_time(self):
         """Return watering_time from zone."""
         return self._lookup_attr('zone_2_watering_time')
 
+    @zone3_watering_time.setter
+    def zone3_watering_time(self, value):
+        """Manually turn on water for X minutes."""
+        return self._set_watering_time(3, value)
+
     @property
     def zone4_watering_time(self):
         """Return watering_time from zone."""
         return self._lookup_attr('zone_3_watering_time')
+
+    @zone4_watering_time.setter
+    def zone4_watering_time(self, value):
+        """Manually turn on water for X minutes."""
+        return self._set_watering_time(4, value)
 
     @property
     def zone1_droplet(self):
@@ -216,7 +258,7 @@ class RainCloudyFaucet(object):
             'select_zone': str(zone),
             'zone_name': name,
         }
-        self._controller.setup_post(data)
+        self._controller.post(data)
 
     @property
     def zone1_name(self):
@@ -258,57 +300,44 @@ class RainCloudyFaucet(object):
         """Set a new zone name to faucet."""
         self._set_zone_name(3, value)
 
+    def _zone_constructor(self, zoneid):
+        """Method to build zone dict."""
+        return {
+            'auto_watering':
+                getattr(self, "zone{}_auto_watering".format(zoneid)),
+            'droplet':
+                getattr(self, "zone{}_droplet".format(zoneid)),
+            'is_watering':
+                getattr(self, "zone{}_is_watering".format(zoneid)),
+            'name':
+                getattr(self, "zone{}_name".format(zoneid)),
+            'next_cycle':
+                getattr(self, "zone{}_next_cycle".format(zoneid)),
+            'rain_delay':
+                getattr(self, "zone{}_rain_delay".format(zoneid)),
+            'watering_time':
+                getattr(self, "zone{}_watering_time".format(zoneid)),
+        }
+
     @property
     def zone1(self):
         """Return status from zone."""
-        return {
-            'auto_watering': self.zone1_auto_watering,
-            'droplet': self.zone1_droplet,
-            'is_watering': self.zone1_is_watering,
-            'name': self.zone1_name,
-            'next_cycle': self.zone1_next_cycle,
-            'rain_delay': self.zone1_rain_delay,
-            'watering_time': self.zone1_watering_time,
-        }
+        return self._zone_constructor(1)
 
     @property
     def zone2(self):
         """Return status from zone."""
-        return {
-            'auto_watering': self.zone2_auto_watering,
-            'droplet': self.zone2_droplet,
-            'is_watering': self.zone2_is_watering,
-            'name': self.zone2_name,
-            'next_cycle': self.zone2_next_cycle,
-            'rain_delay': self.zone2_rain_delay,
-            'watering_time': self.zone2_watering_time,
-        }
+        return self._zone_constructor(2)
 
     @property
     def zone3(self):
         """Return status from zone."""
-        return {
-            'auto_watering': self.zone3_auto_watering,
-            'droplet': self.zone3_droplet,
-            'is_watering': self.zone3_is_watering,
-            'name': self.zone3_name,
-            'next_cycle': self.zone3_next_cycle,
-            'rain_delay': self.zone3_rain_delay,
-            'watering_time': self.zone3_watering_time,
-        }
+        return self._zone_constructor(3)
 
     @property
     def zone4(self):
         """Return status from zone."""
-        return {
-            'auto_watering': self.zone4_auto_watering,
-            'droplet': self.zone4_droplet,
-            'is_watering': self.zone4_is_watering,
-            'name': self.zone4_name,
-            'next_cycle': self.zone4_next_cycle,
-            'rain_delay': self.zone4_rain_delay,
-            'watering_time': self.zone4_watering_time,
-        }
+        return self._zone_constructor(4)
 
     @property
     def zones(self):
@@ -319,7 +348,7 @@ class RainCloudyFaucet(object):
             zones[attr] = getattr(self, attr)
         return zones
 
-    def prepare_update(self, force_refresh=True):
+    def preupdate(self, force_refresh=True):
         """Return a dict with all current options prior submitting request."""
         ddata = MANUAL_OP_DATA.copy()
 
@@ -333,10 +362,12 @@ class RainCloudyFaucet(object):
         ddata['select_faucet'] = self._controller.faucets.index(self)
 
         # check if zone is scheduled automatically (zone1_program_toggle)
+        # only add zoneX_program_toogle to ddata when needed,
+        # otherwise the field will be always on
         for zone in range(1, 5):
             attr = 'zone{}_program_toggle'.format(zone)
             attr_opt = 'zone{}_auto_watering'.format(zone)
-            if getattr(self, attr_opt) and attr in ddata.keys():
+            if getattr(self, attr_opt):
                 ddata[attr] = 'on'
 
         # check if zone current watering manually (zone1_select_manual_mode)
@@ -360,6 +391,8 @@ class RainCloudyFaucet(object):
 
         return ddata
 
-    def submit(self, ddata):
+    def submit_action(self, ddata):
         """Post data."""
-        self._controller.setup_post(ddata, referer=HOME_ENDPOINT)
+        self._controller.post(ddata,
+                              url=HOME_ENDPOINT,
+                              referer=HOME_ENDPOINT)
