@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
 from tests.test_base import UnitTestBase
-from tests.helpers import CSRFTOKEN
+from tests.helpers import CONTROLLER_SERIAL, CSRFTOKEN
 
 
 class TestRainCloudyCore(UnitTestBase):
@@ -15,6 +15,16 @@ class TestRainCloudyCore(UnitTestBase):
                              [None, None])
         self.assertTrue(self.rdy.client.verify)
         self.assertTrue(self.rdy.client.stream)
+
+    def test_errors_or_exceptions(self):
+        """Tests for errors or exceptions."""
+
+        self.rdy.controllers.append(1)
+        self.assertRaises(TypeError, getattr, self.rdy, 'controller')
+
+        # csrftoken must be None if client not present
+        self.rdy.client = None
+        self.assertIsNone(self.rdy.csrftoken)
 
     def test_attributes(self):
         """Test core attributes."""
@@ -30,6 +40,8 @@ class TestRainCloudyCore(UnitTestBase):
         self.assertTrue(hasattr(self.rdy, 'logout'))
         self.assertTrue(hasattr(self.rdy, 'update'))
 
+        objname = "<RainCloudy: {}>".format(CONTROLLER_SERIAL)
+        self.assertEquals(self.rdy.__repr__(), objname)
         self.assertEqual(self.rdy.csrftoken, CSRFTOKEN)
 
         self.assertEqual(1, len(self.rdy.controllers))
