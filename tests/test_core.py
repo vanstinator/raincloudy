@@ -58,3 +58,5 @@ class TestRainCloudyCore(UnitTestBase):
         self.assertIsNone(self.rdy.html['manage'])
 
         self.assertIsNone(self.rdy.logout())
+
+# vim:sw=4:ts=4:et:
