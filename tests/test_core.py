@@ -19,8 +19,13 @@ class TestRainCloudyCore(UnitTestBase):
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
 
+        # check if has more than 1 controller
         self.rdy.controllers.append(1)
         self.assertRaises(TypeError, getattr, self.rdy, 'controller')
+
+        # check if controllers does not exist
+        delattr(self.rdy, 'controllers')
+        self.assertRaises(AttributeError, getattr, self.rdy, 'controller')
 
         # csrftoken must be None if client not present
         self.rdy.client = None
@@ -51,3 +56,5 @@ class TestRainCloudyCore(UnitTestBase):
         self.assertIsNone(self.rdy.html['setup'])
         self.assertIsNone(self.rdy.html['program'])
         self.assertIsNone(self.rdy.html['manage'])
+
+        self.assertIsNone(self.rdy.logout())
