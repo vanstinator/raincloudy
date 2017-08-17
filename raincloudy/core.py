@@ -119,13 +119,12 @@ class RainCloudy(object):
     @property
     def controller(self):
         """Show current linked controllers."""
-        try:
+        if hasattr(self, 'controllers'):
             if len(self.controllers) > 1:
                 # in the future, we should support more controllers
                 raise TypeError("Only one controller per account.")
             return self.controllers[0]
-        except IndexError:
-            return None
+        raise AttributeError("There is no controller assigned.")
 
     def logout(self):
         """Logout."""

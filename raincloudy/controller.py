@@ -29,14 +29,10 @@ class RainCloudyController(object):
         self._parent = parent
         self._controller_id = controller_id
 
-        if not isinstance(parent, raincloudy.core.RainCloudy):
-            raise TypeError("Invalid parent object.")
+        self._verify_parent()
 
         # faucets associated with controller
         self.faucets = []
-
-        if not faucets:
-            raise TypeError("Controller does not have a faucet assigned.")
 
         # load assigned faucets
         self._assign_faucets(faucets)
@@ -44,8 +40,16 @@ class RainCloudyController(object):
         # populate controller attributes
         self.update()
 
+    def _verify_parent(self):
+        """Verify parent type."""
+        if not isinstance(self._parent, raincloudy.core.RainCloudy):
+            raise TypeError("Invalid parent object.")
+
     def _assign_faucets(self, faucets):
         """Assign RainCloudyFaucet objects to self.faucets."""
+        if not faucets:
+            raise TypeError("Controller does not have a faucet assigned.")
+
         for faucet_id in faucets:
             self.faucets.append(
                 RainCloudyFaucet(self._parent, self, faucet_id))
@@ -169,12 +173,11 @@ class RainCloudyController(object):
     @property
     def faucet(self):
         """Show current linked faucet."""
-        try:
+        if hasattr(self, 'faucets'):
             if len(self.faucets) > 1:
-                # in the future, we should support more controllers
-                raise TypeError("Only one controller per account.")
+                # in the future, we should support more faucets
+                raise TypeError("Only one faucet per account.")
             return self.faucets[0]
-        except IndexError:
-            return None
+        raise AttributeError("There is no faucet assigned.")
 
 # vim:sw=4:ts=4:et:
