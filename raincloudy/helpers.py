@@ -158,16 +158,13 @@ def find_zone_name(data, zone_id):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    try:
-        table = data.find('table', {'class': 'zone_table'})
-        table_body = table.find('tbody')
-        rows = table_body.find_all('span', {'class': 'more_info'})
-        for row in rows:
-            if row.get_text().startswith(str(zone_id)):
-                return row.get_text()[4:].strip()
-        return None
-    except IndexError:
-        return None
+    table = data.find('table', {'class': 'zone_table'})
+    table_body = table.find('tbody')
+    rows = table_body.find_all('span', {'class': 'more_info'})
+    for row in rows:
+        if row.get_text().startswith(str(zone_id)):
+            return row.get_text()[4:].strip()
+    return None
 
 
 # vim:sw=4:ts=4:et:
