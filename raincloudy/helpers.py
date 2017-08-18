@@ -2,6 +2,7 @@
 """Raincloudy helpers."""
 import re
 from bs4 import BeautifulSoup
+from raincloudy.exceptions import RainCloudyException
 
 
 def generate_soup_html(data):
@@ -42,8 +43,9 @@ def serial_finder(data):
         parsed_dict['faucet_serial'] = [result['faucet_serial']]
         return parsed_dict
 
-    except IndexError:
-        raise "Could not find expression."
+    except (AttributeError, IndexError, ValueError):
+        raise RainCloudyException(
+            'Could not find any valid controller or faucet')
 
 
 def find_attr(data, key):
@@ -67,7 +69,6 @@ def find_attr(data, key):
     for member in data:
         if member.get('cmd') == 'as' and member.get('id') == key:
             return member.get('val')
-    return None
 
 
 def find_program_status(data, zone):
@@ -101,8 +102,9 @@ def find_program_status(data, zone):
                member.get('id') == zone_id:
                 return bool(member.has_attr('checked'))
         raise IndexError
-    except IndexError:
-        raise "Could not find expression."
+    except (AttributeError, IndexError, ValueError):
+        raise RainCloudyException(
+            'Could not find any valid controller or faucet')
 
 
 def find_controller_or_faucet_name(data, p_type):
@@ -132,9 +134,9 @@ def find_controller_or_faucet_name(data, p_type):
 
     try:
         search_field = 'id_select_{0}'.format(p_type)
-        child = data.find_all('select', {'id': search_field})[0]
+        child = data.find('select', {'id': search_field})
         return child.get_text().strip()
-    except IndexError:
+    except AttributeError:
         return None
 
 
@@ -156,16 +158,13 @@ def find_zone_name(data, zone_id):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    try:
-        table = data.find('table', {'class': 'zone_table'})
-        table_body = table.find('tbody')
-        rows = table_body.find_all('span', {'class': 'more_info'})
-        for row in rows:
-            if row.get_text().startswith(str(zone_id)):
-                return row.get_text()[4:].strip()
-        return None
-    except IndexError:
-        return None
+    table = data.find('table', {'class': 'zone_table'})
+    table_body = table.find('tbody')
+    rows = table_body.find_all('span', {'class': 'more_info'})
+    for row in rows:
+        if row.get_text().startswith(str(zone_id)):
+            return row.get_text()[4:].strip()
+    return None
 
 
 # vim:sw=4:ts=4:et:

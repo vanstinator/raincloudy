@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
 from tests.test_base import UnitTestBase
-from tests.helpers import CONTROLLER_SERIAL, CSRFTOKEN
+from tests.extras import CONTROLLER_SERIAL, CSRFTOKEN
 
 
 class TestRainCloudyCore(UnitTestBase):

@@ -12,7 +12,7 @@ except NameError:
 import unittest
 import requests_mock
 
-from tests.helpers import load_fixture, CSRFTOKEN, USERNAME, PASSWORD
+from tests.extras import load_fixture, CSRFTOKEN, USERNAME, PASSWORD
 
 from raincloudy.const import LOGIN_ENDPOINT, DAJAXICE_ENDPOINT, HOME_ENDPOINT
 
