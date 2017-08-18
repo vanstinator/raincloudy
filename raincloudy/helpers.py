@@ -2,7 +2,7 @@
 """Raincloudy helpers."""
 import re
 from bs4 import BeautifulSoup
-from raincloudy.exceptions import RaincloudyException
+from raincloudy.exceptions import RainCloudyException
 
 
 def generate_soup_html(data):
@@ -44,7 +44,7 @@ def serial_finder(data):
         return parsed_dict
 
     except (AttributeError, IndexError, ValueError):
-        raise RaincloudyException(
+        raise RainCloudyException(
             'Could not find any valid controller or faucet')
 
 
@@ -103,7 +103,7 @@ def find_program_status(data, zone):
                 return bool(member.has_attr('checked'))
         raise IndexError
     except (AttributeError, IndexError, ValueError):
-        raise RaincloudyException(
+        raise RainCloudyException(
             'Could not find any valid controller or faucet')
 
 
@@ -134,9 +134,9 @@ def find_controller_or_faucet_name(data, p_type):
 
     try:
         search_field = 'id_select_{0}'.format(p_type)
-        child = data.find_all('select', {'id': search_field})[0]
+        child = data.find('select', {'id': search_field})
         return child.get_text().strip()
-    except IndexError:
+    except AttributeError:
         return None
 
 

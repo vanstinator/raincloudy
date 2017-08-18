@@ -2,6 +2,6 @@
 """RainCloudy exceptions object."""
 
 
-class RaincloudyException(Exception):
+class RainCloudyException(Exception):
     """RainCloudy base exceptions."""
     pass
