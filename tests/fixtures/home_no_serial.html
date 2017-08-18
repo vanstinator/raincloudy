@@ -1,0 +1,529 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Home</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/css/styles.css?12347" type="text/css" />
+<link rel="stylesheet" href="/static/css/jquery.qtip.css?12345" type="text/css" />
+<link rel="stylesheet" href="/static/css/boilerplate.css?12345" type="text/css">
+<link rel="stylesheet" href="/static/SpryAssets/SpryMenuBarHorizontal.css?12345" type="text/css">
+<script type="text/javascript" src="/static/SpryAssets/SpryMenuBar.js?12345"></script>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="/static/js/jquery.ba-serializeobject.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.qtip.js"></script>
+<script type="text/javascript" src="/static/js/melnor.js"></script>
+<script type="text/javascript" src="/static/js/enterastab.js"></script>
+
+<!-- Include for Dajaxice -->
+<script src="/static/js/jquery.dajax.core.js" type="text/javascript"></script>
+<script src="/static/js/dajaxice.core.js" type="text/javascript"></script>
+<!--<script src="/static/js/dajaxice_module_loop.js" type="text/javascript"></script>-->
+<!--<script src="/static/js/dajaxice_function_loop.js" type="text/javascript"></script>-->
+<!-- <script src="/static/js/jquery.dajax.core.js" type="text/javascript"></script> -->
+
+<!-- Display hover on the active menu page -->
+<script type="text/javascript" src="/static/SpryAssets/SpryDOMUtils.js"></script>
+<script type="text/javascript">
+// Load listener
+Spry.Utils.addLoadListener(function() {
+    // Get all <a> elements in the menu
+    Spry.$$(".MenuBarHorizontal li a").forEach(function(e) {
+        // If page URL matches this <a> element
+        if((decodeURI(e.href)) == window.location) {
+            // Add class name to <a> element
+            Spry.Utils.addClassName(e, "MenuBarItemHover");
+        };
+    });
+});
+</script>
+
+<!-- Refresh the page using AJAX -->
+<script type="text/javascript">
+function my_js_callback(data){
+    alert(data.message);
+}
+
+// AJAX: on a regular interval update all elements, currently every 15 seconds
+$( document ).ready(function() {
+    setInterval(function () {
+</script>
+
+<!-- If an OTA update is in progress, then show a popup informing the user to wait -->
+
+<!-- End of OTA update in progress check -->
+
+</head>
+<body class="status" id="home">
+
+    
+    <form action="/home" method="post" id="configure_form">
+    <input type='hidden' name='csrfmiddlewaretoken' value='AbCdEFJeCDnkC2pdmrywqBAbN9999999' />
+
+<div class="gridContainer clearfix" >
+
+<div id="Title1">
+<div style="float:left;width:50%;">
+<img src="/static/images/Melnorlogo_for_Website.svg" alt="melnor.com">
+</div>
+<div style="float:right;width:50%;text-align:right;">
+<img src="/static/images/RainCloud.svg" alt="melnor.com" style="margin-bottom:1%;"></center>
+</div>
+</div>
+
+<div id="LayoutDiv1">
+  <!-- Menu --> <center>
+
+
+<ul id="MenuBar1" class="MenuBarHorizontal">
+    
+        
+        <li id="menu_id_home"><a href="/home">Home</a></li>
+    
+        
+        <li id="menu_id_setup"><a href="/setup/">Setup</a></li>
+    
+        
+        <li id="menu_id_program"><a href="/program/">Program</a></li>
+    
+        
+        <li id="menu_id_manage"><a href="/manage/">Manage</a></li>
+    
+        
+        <li id="menu_id_logout"><a href="/logout">Logout</a></li>
+    
+</ul> </center>
+</div>
+<div id="InnerContainer">
+<div id="LayoutDiv3">
+    <!-- Weather -->
+    
+        <table border="0" class="weather_table">
+            <tr>
+                <td id="ICcol1">
+    <!-- current time -->
+    <!-- Only show the current time if it is defined -->
+    
+        <label><span class="more_info" id="#styling-type-light" data-hasqtip="32" title="Current time of the selected controller">Time</span></label></td>
+                <td>Today</td>
+                
+                    
+                <td>Sat</td>
+                    
+                <td>Sun</td>
+                    
+                <td>Mon</td>
+                    
+                
+            </tr>
+            <tr>
+            		<td id="ICcol1"><label class="unselectable" id="current_time">01:28 AM</label></td>
+    
+                
+                    <td><img src="/static/images/10d.svg" /><br>
+                    75 - 72°</td>
+                
+                    <td><img src="/static/images/10d.svg" /><br>
+                    80 - 73°</td>
+                
+                    <td><img src="/static/images/10d.svg" /><br>
+                    85 - 73°</td>
+                
+                    <td><img src="/static/images/10d.svg" /><br>
+                    85 - 74°</td>
+                
+            </tr>
+        </table>
+    
+    <!--
+    <br/>
+    <br/>
+    <!-- In order to align the text in the textarea properly, the whitespace must be exactly as what is used here -->
+    <!--<textarea rows="5" cols="25" style="text-align:left;" readonly="yes" wrap="hard">[[u&#39;12 - 34\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;21 - 39\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;27 - 36\xb0&#39;, u&#39;mcloudy.png&#39;], [u&#39;30 - 46\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;36 - 54\xb0&#39;, u&#39;mcloudy.png&#39;]]</textarea>
+    <label for="placeholder"></label>
+    -->    
+</div>
+<hr style="clear:both;">
+<div id="LayoutDiv4">
+
+<!-- Help Button -->
+	<div class="helpbutton"><a href="/help"><img src="/static/images/help.svg" alt="help"></a></div>
+
+<!-- Select Control unit -->
+   <div class="controlunit">
+   <label for="select_controller"><span class="more_info" id="#styling-type-light" data-hasqtip="26" title="Select Control Unit to display." >Control Unit:</span></label><br/>
+    <select class="simpleselect" id="id_select_controller" name="select_controller" onchange="submit()" >
+        
+            
+                <option value="0" selected="selected">Controller001
+            
+        
+    </select>    
+<!-- Display a text control UNDER to it with online/offline status -->
+    <br />
+   <!-- Show the controller as online/offline with appropriate styling rules -->
+   
+       <!-- <label id="controller_online" class="testing" style="background: #6BBF3F;color: white;padding: 2px;padding-left: 4px;padding-right: 4px;">Online</label> -->
+       <label id="controller_online" class="controller_label_online">Online</label>
+   
+
+    <label for="placeholder"></label>
+    </div>
+     
+<!-- Battery Status -->
+	<div id="batteryindicator">
+    <label for="faucet_battery_status"></label><center id="battery_level">
+    
+        <img id="battery_level_icon" src="/static/images/blank.gif"/><br/>
+        <label id="active_faucet_battery_level"></label>
+    
+    </center>
+    </div>
+
+<!-- Select Valve -->
+    <div class="valveunit">
+    <label for="id_select_faucet"><span class="more_info" data-hasqtip="59" title="Select Valve Unit to display" >Valve Unit:</span></label><br/>
+    <select class="simpleselect" id="id_select_faucet" name="select_faucet" onchange="submit()" >
+        
+            
+                <option value="0" selected="selected">Faucet001
+            
+        
+    </select>
+<!-- Display a text control UNDER to it with online/offline status -->
+	<br />
+    <!-- Show appropriate text for whether it is online or offline with appropriate styling rules -->
+    
+        <!-- <label id="faucet_online" style="background: #ffe100;color: black;padding: 2px;padding-left: 4px;padding-right: 4px;">Offline</label> -->
+        <label id="faucet_online" class="faucet_label_offline">Online</label>
+    
+    </div>
+
+<!-- AquaSentry Status -->
+	<div id="ICcol1">
+	<div id="AquaSentryIconDiv">
+    <center>
+        <!-- Depending on moisture sensor status, show it or not for the current faucet -->
+        
+            <img class="aquasentry" src="/static/images/aquasentryOFF.svg" id="moisture_sensor_img"/>
+        
+    </center>
+    </div>    
+    </div>
+    
+<!-- Zone status -->
+        
+
+<!-- Valve Unit SVG Grid -->
+		 <div id="UnitImage">
+         		<!-- Row 1 -->
+		<!--
+         <div class="row1col1">&nbsp;</div>
+         -->
+         		<!-- Row 2.  Note the use of if to check for a watering time of 0, in which case it is hidden from view -->
+         <div class="row2col9" style="left:20.5%;" id="zone_0_watering_time">0 </div>
+         <div class="row2col9" style="left:40.25%;" id="zone_1_watering_time"> 0 </div>
+         <div class="row2col9" style="left:60%;" id="zone_2_watering_time"> 0 </div>
+         <div class="row2col9" style="left:79.5%;" id="zone_3_watering_time"> 0 </div>
+         		<!-- Row 3 -->
+         <div class="row3col1">&nbsp; </div>
+
+ <!-- ROW 5 WATER DROPLETS -->
+        <div class="row5col4" style="left:20.5%;">
+            <div id="droplet" class="droplet"><img id="droplet_zone_0" src="/static/images/blank.gif" /></div>
+		</div>
+        
+        <div class="row5col4" style="left:40.25%;">
+			<div id="droplet" class="droplet"><img id="droplet_zone_1" src="/static/images/blank.gif" /></div>
+	    </div>
+        
+        <div class="row5col4" style="left:60%;">
+			<div id="droplet" class="droplet"><img id="droplet_zone_2" src="/static/images/blank.gif" /></div>
+		</div>
+        
+        <div class="row5col4" style="left:79.5%;">
+			<div id="droplet" class="droplet"><img id="droplet_zone_3" src="/static/images/blank.gif" /></div>
+        </div>
+
+<!-- Unit Image -->
+         <img id="UnitImage" class="valve-unit" src="/static/images/Valve_Unit_Front_GUI.svg" alt="Unit"> </div>
+<!-- End Valve Unit SVG Grid -->
+
+</div>
+<div id="LayoutDiv5">
+<!-- Zone Details -->
+<!--  <h4><span class="more_info" data-hasqtip="70" oldtitle="Shows all zones attached to the current faucet with various settings available to change" title="">Zone Details</span></h4> -->
+        
+        <table border="0" class="zone_table">
+        <!-- Zone header row -->
+        <tbody><tr style="font-weight:bold;">
+          <td align="center" valign="middle" id="ICcol1"><h2>Zone</h2></td>
+        
+        
+            
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">1 - Front Yard</span></td>
+            
+        
+            
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">2 - Backyard Zone2</span></td>
+            
+        
+            
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">3 - Trees Fence</span></td>
+            
+        
+            
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">4 - Backyard Zone1</span></td>
+            
+        
+        </tr>
+        </tbody>
+        </table>
+<hr style="clear:both;">
+
+        <table border="0" class="zone_table">
+        <!-- Zone header row -->
+        <tbody><tr style="font-weight:bold;">
+        <!-- Set Manual Time row -->
+        <tr><td align="center" valign="middle"><span class="more_info" data-hasqtip="127" title="Water manually for up to 60 minutes." ><h2>Manual</h2></span></td>
+        
+            <td align="center">
+                <select class="simpleselect" id="id_select_manual_mode_0" name="zone1_select_manual_mode" onchange="submit()">
+                <option value="OFF" selected="selected">OFF</option>
+                <!-- Note:  ON is never shown as the selected option because it corresponds to 60 below -->
+                <option value="ON" >ON</option>
+                <option value="5" >5</option>
+                <option value="10" >10</option>
+                <option value="15" >15</option>
+                <option value="30" >30</option>
+                <option value="45" >45</option>
+                <option value="60" >60</option>
+                </select>
+            </td>
+        
+            <td align="center">
+                <select class="simpleselect" id="id_select_manual_mode_1" name="zone2_select_manual_mode" onchange="submit()">
+                <option value="OFF" selected="selected">OFF</option>
+                <!-- Note:  ON is never shown as the selected option because it corresponds to 60 below -->
+                <option value="ON" >ON</option>
+                <option value="5" >5</option>
+                <option value="10" >10</option>
+                <option value="15" >15</option>
+                <option value="30" >30</option>
+                <option value="45" >45</option>
+                <option value="60" >60</option>
+                </select>
+            </td>
+        
+            <td align="center">
+                <select class="simpleselect" id="id_select_manual_mode_2" name="zone3_select_manual_mode" onchange="submit()">
+                <option value="OFF" selected="selected">OFF</option>
+                <!-- Note:  ON is never shown as the selected option because it corresponds to 60 below -->
+                <option value="ON" >ON</option>
+                <option value="5" >5</option>
+                <option value="10" >10</option>
+                <option value="15" >15</option>
+                <option value="30" >30</option>
+                <option value="45" >45</option>
+                <option value="60" >60</option>
+                </select>
+            </td>
+        
+            <td align="center">
+                <select class="simpleselect" id="id_select_manual_mode_3" name="zone4_select_manual_mode" onchange="submit()">
+                <option value="OFF" selected="selected">OFF</option>
+                <!-- Note:  ON is never shown as the selected option because it corresponds to 60 below -->
+                <option value="ON" >ON</option>
+                <option value="5" >5</option>
+                <option value="10" >10</option>
+                <option value="15" >15</option>
+                <option value="30" >30</option>
+                <option value="45" >45</option>
+                <option value="60" >60</option>
+                </select>
+            </td>
+        
+        </tr>
+        </tbody>
+        </table>
+<hr style="clear:both;">
+
+        <table border="0" class="zone_table">
+        <!-- Zone header row -->
+        <tbody><tr style="font-weight:bold;">
+        <!-- Edit zone row -->
+        <tr>
+        <td align="center" valign="middle"><span class="more_info" title="Program runs when on. No watering when off."><h2>Auto</h2></span></td>
+        
+        <td align="center">
+        <div class="">
+        <input class="switch" id="id_zone1_program_toggle" type="checkbox" name="zone1_program_toggle"  onchange="submit()">
+                <label for="id_zone1_program_toggle">&nbsp;</label>
+        </div>
+        </td>
+		
+        <td align="center">
+        <div class="">
+        <input class="switch" id="id_zone2_program_toggle" type="checkbox" name="zone2_program_toggle"  onchange="submit()">
+                <label for="id_zone2_program_toggle">&nbsp;</label>
+        </div>
+        </td>
+		
+        <td align="center">
+        <div class="">
+        <input class="switch" id="id_zone3_program_toggle" type="checkbox" name="zone3_program_toggle"  onchange="submit()">
+                <label for="id_zone3_program_toggle">&nbsp;</label>
+        </div>
+        </td>
+		
+        <td align="center">
+        <div class="">
+        <input class="switch" id="id_zone4_program_toggle" type="checkbox" name="zone4_program_toggle"  onchange="submit()">
+                <label for="id_zone4_program_toggle">&nbsp;</label>
+        </div>
+        </td>
+		
+        </tr>
+        <!-- Edit zone row -->
+        <tr><td align="center" valign="middle"><span class="more_info" data-hasqtip="116" title="Create or change a program." ><h3>Edit</h3></span></td>
+        
+            <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_0" id="edit_zone" value="Edit" >
+            </td>
+
+        
+            <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_1" id="edit_zone" value="Edit" >
+            </td>
+
+        
+            <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_2" id="edit_zone" value="Edit" >
+            </td>
+
+        
+            <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_3" id="edit_zone" value="Edit" >
+            </td>
+
+        
+        </tr>
+
+        <!-- Set rain delay master mode -->
+        <tr>
+            <td align="center" valign="middle"><span class="more_info" data-hasqtip="149" title="<h3>How long to skip watering.  For Automatic Rain Delay visit www.melnor.com/raindelay" ><h3>Rain Delay</h3></span></td>
+            
+                <td align="center">
+                    <select class="simpleselect" name="zone0_rain_delay_select" id="id_zone1_rain_delay_select" onchange="submit()">
+                        <option value="off" >OFF</option>
+                        <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
+                        
+                        <option value="1day" >1 DAY</option>
+                        <option value="2days" >2 DAYS</option>
+                        <option value="3days" >3 DAYS</option>
+                        <option value="4days" selected="selected">4 DAYS</option>
+                        <option value="5days" >5 DAYS</option>
+                        <option value="6days" >6 DAYS</option>
+                        <option value="7days" >7 DAYS</option>
+                    </select>
+               </td>
+            
+                <td align="center">
+                    <select class="simpleselect" name="zone1_rain_delay_select" id="id_zone2_rain_delay_select" onchange="submit()">
+                        <option value="off" selected="selected">OFF</option>
+                        <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
+                        
+                        <option value="1day" >1 DAY</option>
+                        <option value="2days" >2 DAYS</option>
+                        <option value="3days" >3 DAYS</option>
+                        <option value="4days" >4 DAYS</option>
+                        <option value="5days" >5 DAYS</option>
+                        <option value="6days" >6 DAYS</option>
+                        <option value="7days" >7 DAYS</option>
+                    </select>
+               </td>
+            
+                <td align="center">
+                    <select class="simpleselect" name="zone2_rain_delay_select" id="id_zone3_rain_delay_select" onchange="submit()">
+                        <option value="off" selected="selected">OFF</option>
+                        <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
+                        
+                        <option value="1day" >1 DAY</option>
+                        <option value="2days" >2 DAYS</option>
+                        <option value="3days" >3 DAYS</option>
+                        <option value="4days" >4 DAYS</option>
+                        <option value="5days" >5 DAYS</option>
+                        <option value="6days" >6 DAYS</option>
+                        <option value="7days" >7 DAYS</option>
+                    </select>
+               </td>
+            
+                <td align="center">
+                    <select class="simpleselect" name="zone3_rain_delay_select" id="id_zone4_rain_delay_select" onchange="submit()">
+                        <option value="off" selected="selected">OFF</option>
+                        <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
+                        
+                        <option value="1day" >1 DAY</option>
+                        <option value="2days" >2 DAYS</option>
+                        <option value="3days" >3 DAYS</option>
+                        <option value="4days" >4 DAYS</option>
+                        <option value="5days" >5 DAYS</option>
+                        <option value="6days" >6 DAYS</option>
+                        <option value="7days" >7 DAYS</option>
+                    </select>
+               </td>
+            
+        </tr>
+
+        <!-- Show next water cycle time -->
+        <tr>
+            <td align="center" valign="middle"><span class="more_info" data-hasqtip="149" title="The next time this zone will water."><h3>Next Cycle</h3></span></td>
+            
+                <td align="center"><div>
+                    <label class="unselectable" id="zone_0_countdown_time">Delayed</label>
+               </div></td>
+            
+                <td align="center"><div>
+                    <label class="unselectable" id="zone_1_countdown_time">Off</label>
+               </div></td>
+            
+                <td align="center"><div>
+                    <label class="unselectable" id="zone_2_countdown_time">Off</label>
+               </div></td>
+            
+                <td align="center"><div>
+                    <label class="unselectable" id="zone_3_countdown_time">Off</label>
+               </div></td>
+            
+        </tr>
+        </tbody></table>
+</div>
+
+    
+
+<!-- Hide OTA controls
+    <input type="submit" id="update_ota" name="update_ota" value="Update OTA">
+    <select class="simpleselect" id="id_select_firmware_revision" name="select_firmware_revision" >
+        
+            <option value="0313">rev_0313</option>
+        
+    <input type="submit" id="detect_rev_ota" name="detect_rev_ota" name="detect_rev_ota" value="Test Auto-Detect">
+    </select>
+<!-- End of OTA controls -->
+    </form>
+<!-- End of Content -->
+</div>
+<!--Footer -->
+</div>
+<center>
+<!-- Copyright -->
+<span style="font-size:smaller; color:#ffffff;">Copyright &copy; 2016 Melnor, Inc. All Rights Reserved.&nbsp;Forecast by OpenWeatherMap</span>
+</center>
+ 
+
+<script type="text/javascript">
+var MenuBar1 = new Spry.Widget.MenuBar("MenuBar1", {imgDown:"SpryAssets/SpryMenuBarDownHover.gif", imgRight:"SpryAssets/SpryMenuBarRightHover.gif"});
+</script>
+
+</body>
+</html>
+

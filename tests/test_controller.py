@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.controller."""
 from tests.test_base import UnitTestBase
-from tests.helpers import (
+from tests.extras import (
     CONTROLLER_NAME, CONTROLLER_SERIAL, CONTROLLER_TIMESTAMP)
 
 
@@ -11,12 +11,11 @@ class TestRainCloudyController(UnitTestBase):
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
         from raincloudy.controller import RainCloudyController
-
         controller = self.rdy.controller
 
         # make sure _parent is a RainCloudy.core object
         controller._parent = None
-        self.assertRaises(TypeError, controller, '_verify_parent')
+        self.assertRaises(TypeError, controller._parent, '_verify_parent')
 
         # if _parent is not present, must return __repr__ with ID
         objname = "<RainCloudyController: {}>".format(CONTROLLER_SERIAL)
@@ -26,9 +25,16 @@ class TestRainCloudyController(UnitTestBase):
         self.assertRaises(TypeError, RainCloudyController,
                           self.rdy, CONTROLLER_SERIAL)
 
+        # check if has more than 1 faucet
+        controller.faucets.append(1)
+        self.assertRaises(TypeError, getattr, controller, 'faucet')
+
+        # check if faucets does not exist
+        delattr(controller, 'faucets')
+        self.assertRaises(AttributeError, getattr, controller, 'faucet')
+
     def test_attributes(self):
         """Test controller attributes."""
-
         controller = self.rdy.controller
 
         self.assertTrue(hasattr(controller, 'current_time'))
@@ -49,6 +55,5 @@ class TestRainCloudyController(UnitTestBase):
         self.assertEquals(controller.id, CONTROLLER_SERIAL)
         self.assertEquals(controller.name, CONTROLLER_NAME)
         self.assertEquals(controller.status, 'Online')
-
 
 # vim:sw=4:ts=4:et:

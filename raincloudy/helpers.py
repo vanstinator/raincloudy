@@ -2,6 +2,7 @@
 """Raincloudy helpers."""
 import re
 from bs4 import BeautifulSoup
+from raincloudy.exceptions import RaincloudyException
 
 
 def generate_soup_html(data):
@@ -42,8 +43,9 @@ def serial_finder(data):
         parsed_dict['faucet_serial'] = [result['faucet_serial']]
         return parsed_dict
 
-    except IndexError:
-        raise "Could not find expression."
+    except (AttributeError, IndexError, ValueError):
+        raise RaincloudyException(
+            'Could not find any valid controller or faucet')
 
 
 def find_attr(data, key):
@@ -67,7 +69,6 @@ def find_attr(data, key):
     for member in data:
         if member.get('cmd') == 'as' and member.get('id') == key:
             return member.get('val')
-    return None
 
 
 def find_program_status(data, zone):
@@ -101,8 +102,9 @@ def find_program_status(data, zone):
                member.get('id') == zone_id:
                 return bool(member.has_attr('checked'))
         raise IndexError
-    except IndexError:
-        raise "Could not find expression."
+    except (AttributeError, IndexError, ValueError):
+        raise RaincloudyException(
+            'Could not find any valid controller or faucet')
 
 
 def find_controller_or_faucet_name(data, p_type):
