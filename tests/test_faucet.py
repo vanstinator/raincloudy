@@ -42,4 +42,43 @@ class TestRainCloudyFaucet(UnitTestBase):
         self.assertEquals(faucet.name, FAUCET_NAME)
         self.assertEquals(faucet.status, 'Online')
 
+        self.assertEquals(faucet.zone1_auto_watering, False)
+        self.assertEquals(faucet.zone1_watering_time, 0)
+        self.assertEquals(faucet.zone4_rain_delay, 4)
+
+    def test_set_rain_delay(self):
+        """Test faucet._set_rain_delay method."""
+        faucet = self.rdy.controller.faucet
+
+        # test if a non-valid parameter is passed
+        for zone_id in range(1, 5):
+            self.assertIsNone(faucet._set_rain_delay(zone_id, 'foorbar'))
+            self.assertIsNone(faucet._set_rain_delay(zone_id, 100))
+
+    def test_set_auto_watering(self):
+        """Test faucet._set_auto_watering method."""
+        faucet = self.rdy.controller.faucet
+
+        # test if a non-valid parameter is passed
+        for zone_id in range(1, 5):
+            self.assertIsNone(faucet._set_auto_watering(zone_id, 'foobar'))
+
+    def test_zones(self):
+        """test faucet.zones attribute."""
+        faucet = self.rdy.controller.faucet
+
+        zones = faucet.zones
+        self.assertIsInstance(zones, dict)
+        self.assertIsInstance(zones['zone1'], dict)
+
+    def test_errors_or_exceptions(self):
+        """Tests for errors or exceptions."""
+        faucet = self.rdy.controller.faucet
+
+        # if name attribute fails, displays id
+        faucet._parent = None
+        objname = "<RainCloudyFaucet: {}>".format(FAUCET_SERIAL)
+        self.assertEquals(faucet.__repr__(), objname)
+
+
 # vim:sw=4:ts=4:et:

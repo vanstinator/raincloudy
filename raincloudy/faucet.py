@@ -34,7 +34,7 @@ class RainCloudyFaucet(object):
         try:
             return "<{0}: {1}>".format(self.__class__.__name__, self.name)
         except AttributeError:
-            return "<{0}: {1}>".format(self.__class__.__name__, self.name)
+            return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
     @property
     def _attributes(self):
@@ -176,23 +176,18 @@ class RainCloudyFaucet(object):
         # current index for rain_delay starts in 0
         zoneid -= 1
 
-        try:
-            if isinstance(value, int):
-                if value > MAX_RAIN_DELAY_DAYS or value < 0:
-                    raise ValueError
-                elif value == 0:
-                    value = 'off'
-                elif value == 1:
-                    value = '1day'
-                elif value >= 2:
-                    value = str(value) + 'days'
-            elif isinstance(value, str):
-                if value.lower() != 'off':
-                    raise ValueError
-        except ValueError:
-            print('Value must be "off" or a number smaller than {}'.format(
-                MAX_RAIN_DELAY_DAYS))
-            return
+        if isinstance(value, int):
+            if value > MAX_RAIN_DELAY_DAYS or value < 0:
+                return None
+            elif value == 0:
+                value = 'off'
+            elif value == 1:
+                value = '1day'
+            elif value >= 2:
+                value = str(value) + 'days'
+        elif isinstance(value, str):
+            if value.lower() != 'off':
+                return None
 
         ddata = self.preupdate()
         attr = 'zone{}_rain_delay_select'.format(zoneid)
@@ -262,7 +257,7 @@ class RainCloudyFaucet(object):
     def _set_auto_watering(self, zoneid, value):
         """Generic method to set auto_watering program."""
         if not isinstance(value, bool):
-            raise ValueError('Must be a boolean')
+            return None
 
         ddata = self.preupdate()
         attr = 'zone{}_program_toggle'.format(zoneid)
