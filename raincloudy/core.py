@@ -41,6 +41,7 @@ class RainCloudy(object):
         # initialize future attributes
         self.controllers = []
         self.client = None
+        self.is_connected = False
         self.html = {
             'home': None,
             'setup': None,
@@ -103,6 +104,7 @@ class RainCloudy(object):
                 parsed_controller['faucet_serial']
             )
         )
+        self.is_connected = True
         return True
 
     @property
@@ -135,5 +137,6 @@ class RainCloudy(object):
         """Cleanup object when logging out."""
         self.client = None
         self.controllers = []
+        self.is_connected = False
 
 # vim:sw=4:ts=4:et:

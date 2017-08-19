@@ -15,6 +15,7 @@ class TestRainCloudyCore(UnitTestBase):
                              [None, None])
         self.assertTrue(self.rdy.client.verify)
         self.assertTrue(self.rdy.client.stream)
+        self.assertEqual(self.rdy.is_connected, True)
 
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
