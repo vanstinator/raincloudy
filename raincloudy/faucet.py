@@ -166,7 +166,6 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         :return: RainCloudyFaucet object
         :rtype: RainCloudyFaucet object
         """
-        super(RainCloudyFaucetZone, self).__init__()
         self._parent = parent
         self._controller = controller
         self._faucet = faucet
