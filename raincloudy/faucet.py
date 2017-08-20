@@ -151,6 +151,8 @@ class RainCloudyFaucet(RainCloudyFaucetCore):
 class RainCloudyFaucetZone(RainCloudyFaucetCore):
     """RainCloudyFaucetZone object."""
 
+    # pylint: disable=super-init-not-called
+    # needs review later
     def __init__(self, parent, controller, faucet, zone_id):
         """
         Initialize RainCloudy Controller object.
