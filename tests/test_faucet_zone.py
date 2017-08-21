@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.faucet.zone."""
 from tests.test_base import UnitTestBase
+from tests.extras import CONTROLLER_TIMESTAMP
 
 
 class TestRainCloudyFaucetZone(UnitTestBase):
@@ -32,9 +33,21 @@ class TestRainCloudyFaucetZone(UnitTestBase):
                 zone_attr = zone_attr.format(zone.id)
                 self.assertTrue(hasattr(zone, zone_attr))
 
+        objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
+        self.assertEquals(faucet.zone1.__repr__(), objname)
+
         self.assertEquals(faucet.zone1.auto_watering, False)
         self.assertEquals(faucet.zone1.watering_time, 0)
         self.assertEquals(faucet.zone4.rain_delay, 4)
+        self.assertEquals(faucet.zone3.current_time, CONTROLLER_TIMESTAMP)
+
+        self.assertIsInstance(faucet.zone2.report(), dict)
+
+    def test_private_methods(self):
+        """Test private methods from faucet.py."""
+        faucet = self.rdy.controller.faucet
+
+        self.assertIsInstance(faucet.zone2._attributes[0], dict)
 
     def test_set_rain_delay(self):
         """Test faucet._set_rain_delay method."""
@@ -53,5 +66,25 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         for zone in faucet.zones:
             self.assertIsNone(zone._set_auto_watering(zone.id, 'foobar'))
 
+    def test_set_watering_time(self):
+        """Test faucet._set_watering_time method."""
+        faucet = self.rdy.controller.faucet
+
+        # verify allowed values
+        self.assertRaises(ValueError,
+                          faucet.zone1._set_watering_time,
+                          faucet.zone1.id,
+                          1000)
+
+    def test_errors_or_exceptions(self):
+        """Tests for errors or exceptions."""
+        faucet = self.rdy.controller.faucet
+
+        faucet._parent = None
+        objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
+        self.assertEquals(faucet.zone1.__repr__(), objname)
+
+        faucet.zones = None
+        self.assertIsNone(faucet.zone1)
 
 # vim:sw=4:ts=4:et:
