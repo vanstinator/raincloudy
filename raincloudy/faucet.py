@@ -117,11 +117,10 @@ class RainCloudyFaucetCore(object):
         if not self.zones:
             return
 
-        try:
-            return list(filter(
-                lambda zone: zone.id == zone_id, self.zones))[0]
-        except IndexError:
-            return None
+        zone = list(filter(
+            lambda zone: zone.id == zone_id, self.zones))
+
+        return zone[0] if zone else None
 
 
 class RainCloudyFaucet(RainCloudyFaucetCore):

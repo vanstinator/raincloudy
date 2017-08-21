@@ -35,7 +35,7 @@ class UnitTestBase(unittest.TestCase):
                  text=load_fixture('home.html'))
 
         # initialize self.rdy object
-        self.rdy = RainCloudy(USERNAME, PASSWORD)
+        self.rdy = RainCloudy(USERNAME, PASSWORD, ssl_warnings=False)
 
         # mock CSRF token
         self.rdy.client.cookies['csrftoken'] = CSRFTOKEN

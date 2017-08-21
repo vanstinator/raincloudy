@@ -14,10 +14,10 @@ class TestRainCloudyController(UnitTestBase):
         controller = self.rdy.controller
 
         # make sure _parent is a RainCloudy.core object
-        controller._parent = None
-        self.assertRaises(TypeError, controller._parent, '_verify_parent')
+        self.assertRaises(TypeError, RainCloudyController, None, None)
 
         # if _parent is not present, must return __repr__ with ID
+        controller._parent = None
         objname = "<RainCloudyController: {}>".format(CONTROLLER_SERIAL)
         self.assertEquals(controller.__repr__(), objname)
 
