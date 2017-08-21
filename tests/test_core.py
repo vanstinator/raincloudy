@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
 from tests.test_base import UnitTestBase
-from tests.extras import CONTROLLER_SERIAL, CSRFTOKEN
+from tests.extras import CONTROLLER_SERIAL
 
 
 class TestRainCloudyCore(UnitTestBase):
@@ -28,10 +28,6 @@ class TestRainCloudyCore(UnitTestBase):
         delattr(self.rdy, 'controllers')
         self.assertRaises(AttributeError, getattr, self.rdy, 'controller')
 
-        # csrftoken must be None if client not present
-        self.rdy.client = None
-        self.assertIsNone(self.rdy.csrftoken)
-
     def test_attributes(self):
         """Test core attributes."""
         from raincloudy.controller import RainCloudyController
@@ -48,7 +44,6 @@ class TestRainCloudyCore(UnitTestBase):
 
         objname = "<RainCloudy: {}>".format(CONTROLLER_SERIAL)
         self.assertEquals(self.rdy.__repr__(), objname)
-        self.assertEqual(self.rdy.csrftoken, CSRFTOKEN)
 
         self.assertEqual(1, len(self.rdy.controllers))
         self.assertIsInstance(self.rdy.controller, RainCloudyController)
