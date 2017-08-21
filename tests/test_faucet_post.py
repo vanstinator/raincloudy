@@ -20,6 +20,7 @@ class TestRainCloudyFaucet(UnitTestBase):
         mock.post(SETUP_ENDPOINT)
 
         faucet = self.rdy.controller.faucet
+        self.assertIsNone(setattr(faucet, 'name', 'test'))
         faucet.update()
 
 # vim:sw=4:ts=4:et:
