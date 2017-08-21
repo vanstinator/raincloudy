@@ -53,5 +53,4 @@ class TestRainCloudyFaucet(UnitTestBase):
         objname = "<RainCloudyFaucet: {}>".format(FAUCET_SERIAL)
         self.assertEquals(faucet.__repr__(), objname)
 
-
 # vim:sw=4:ts=4:et:

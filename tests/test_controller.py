@@ -56,9 +56,4 @@ class TestRainCloudyController(UnitTestBase):
         self.assertEquals(controller.name, CONTROLLER_NAME)
         self.assertEquals(controller.status, 'Online')
 
-    def test_post_actions(self):
-        """Test post actions."""
-        controller = self.rdy.controller
-        controller.name = 'test'
-
 # vim:sw=4:ts=4:et:
