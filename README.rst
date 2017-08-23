@@ -22,6 +22,8 @@ Melnor RainCloud official page: `http://www.melnor.com/16043-raincloud-smart-wat
 
 Melnor RainCloud Youtube video: `https://goo.gl/Y5kx1X`
 
+Source code documentation: `http://raincloudy.readthedocs.io/ <http://raincloudy.readthedocs.io/>`_
+
 Usage
 -----
 
