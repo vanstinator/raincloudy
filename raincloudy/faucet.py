@@ -106,8 +106,10 @@ class RainCloudyFaucetCore(object):
     @property
     def battery(self):
         """Return faucet battery."""
-        battery_level = self._lookup_attr('active_faucet_battery_level')
-        return battery_level if isinstance(battery_level, int) else None
+        battery = self._lookup_attr('active_faucet_battery_level')
+        if battery == '' or battery is None:
+            return None
+        return battery.strip('%')
 
     def update(self):
         """Callback self._controller.update()."""
