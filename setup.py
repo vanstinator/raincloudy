@@ -22,5 +22,5 @@ setup(
         'melnor',
         'rain cloud',
         'water',
-        ],
+    ],
 )
