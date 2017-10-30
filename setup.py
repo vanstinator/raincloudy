@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='raincloudy',
     packages=['raincloudy'],
-    version='0.0.4',
+    version='0.0.5',
     description='A Python library to communicate with Melnor' +
                 ' RainCloud Smart Garden Watering Irrigation Timer' +
                 ' (https://wwww.melnor.com/)',
