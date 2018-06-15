@@ -2,6 +2,12 @@
 """RainCloudy setup script."""
 from setuptools import setup
 
+
+def readme():
+    with open('README.rst') as desc:
+        return desc.read()
+
+
 setup(
     name='raincloudy',
     packages=['raincloudy'],
@@ -9,8 +15,7 @@ setup(
     description='A Python library to communicate with Melnor' +
                 ' RainCloud Smart Garden Watering Irrigation Timer' +
                 ' (https://wwww.melnor.com/)',
-    long_description='A Python library to communicate with Melnor' +
-                ' RainCloud Smart Garden Watering Irrigation Timer' +
+    long_description=readme(),
                 ' (https://wwww.melnor.com/)',
     author='Marcelo Moreira de Mello',
     author_email='tchello.mello@gmail.com',
