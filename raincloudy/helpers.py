@@ -69,6 +69,7 @@ def find_attr(data, key):
     for member in data:
         if member.get('cmd') == 'as' and member.get('id') == key:
             return member.get('val')
+    return None
 
 
 def find_program_status(data, zone):
