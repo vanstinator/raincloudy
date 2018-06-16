@@ -118,7 +118,7 @@ class RainCloudyFaucetCore(object):
     def _find_zone_by_id(self, zone_id):
         """Return zone by id."""
         if not self.zones:
-            return
+            return None
 
         zone = list(filter(
             lambda zone: zone.id == zone_id, self.zones))
@@ -263,6 +263,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         attr = 'zone{}_rain_delay_select'.format(zoneid)
         ddata[attr] = value
         self.submit_action(ddata)
+        return True
 
     @property
     def rain_delay(self):
@@ -296,6 +297,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         except KeyError:
             pass
         self.submit_action(ddata)
+        return True
 
     @property
     def auto_watering(self):
