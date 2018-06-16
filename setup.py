@@ -16,7 +16,6 @@ setup(
                 ' RainCloud Smart Garden Watering Irrigation Timer' +
                 ' (https://wwww.melnor.com/)',
     long_description=readme(),
-                ' (https://wwww.melnor.com/)',
     author='Marcelo Moreira de Mello',
     author_email='tchello.mello@gmail.com',
     url='https://github.com/tchellomello/raincloudy',
