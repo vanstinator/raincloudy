@@ -111,13 +111,13 @@ Usage
     'Outside Left'
 
     # enable automatic program for zone1
-    raincloudy.controller.faucet.zone1_auto_watering = True
+    raincloudy.controller.faucet.zone1.auto_watering = True
 
     # run water for 15 minutes on zone3
-    raincloudy.controller.faucet.zone3_watering_time = 15
+    raincloudy.controller.faucet.zone3.watering_time = 15
 
     # set rain delay for 2 days on zone2
-    raincloudy.controller.faucet.zone2_rain_delay = 2
+    raincloudy.controller.faucet.zone2.rain_delay = 2
 
 
 Current Limitations
