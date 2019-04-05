@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """RainCloud Faucet."""
 from raincloudy.const import (
-    API_URL, HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
+    HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES)
 from raincloudy.helpers import (
     find_controller_or_faucet_name,
@@ -60,10 +60,6 @@ class RainCloudyFaucetCore(object):
         """Callback to self._controller attributes."""
         return self._controller.attributes
 
-    def _lookup_attr(self, key):
-        """Callback for find_attr method."""
-        return getattr(self._controller, 'lookup_attr', None)(key)
-
     @property
     def serial(self):
         """Return faucet id."""
@@ -101,12 +97,12 @@ class RainCloudyFaucetCore(object):
     @property
     def status(self):
         """Return status."""
-        return self._lookup_attr('faucet_online')
+        return self._attributes['faucet_status']
 
     @property
     def battery(self):
         """Return faucet battery."""
-        battery = self._lookup_attr('active_faucet_battery_level')
+        battery = self._attributes['battery_percent']
         if battery == '' or battery is None:
             return None
         return battery.strip('%')
@@ -227,8 +223,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     def watering_time(self):
         """Return watering_time from zone."""
         # zone starts with index 0
-        value = 'zone_{}_watering_time'.format(self.id - 1)
-        return self._lookup_attr(value)
+        index = self.id - 1
+        return self._attributes['rain_delay_mode'][index]['auto_watering_time']
 
     @watering_time.setter
     def watering_time(self, value):
@@ -237,9 +233,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     @property
     def droplet(self):
-        """Return droplet URL from zone"""
-        value = 'droplet_zone_{}'.format(self.id - 1)
-        return "{0}{1}".format(API_URL, self._lookup_attr(value))
+        return None
 
     def _set_rain_delay(self, zoneid, value):
         """Generic method to set auto_watering program."""
@@ -268,8 +262,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def rain_delay(self):
         """Return the rain delay day from zone."""
-        value = 'id_zone{}_rain_delay_select'.format(self.id)
-        return self._lookup_attr(value)
+        index = self.id - 1
+        return self._attributes['rain_delay_mode'][index]['rain_delay_mode']
 
     @rain_delay.setter
     def rain_delay(self, value):
@@ -279,8 +273,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def next_cycle(self):
         """Return the time scheduled for next watering from zone."""
-        value = 'zone_{}_countdown_time'.format(self.id - 1)
-        return self._lookup_attr(value)
+        index = self.id - 1
+        return self._attributes['rain_delay_mode'][index]['next_water_cycle']
 
     def _set_auto_watering(self, zoneid, value):
         """Private method to set auto_watering program."""

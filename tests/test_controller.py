@@ -41,7 +41,6 @@ class TestRainCloudyController(UnitTestBase):
         self.assertTrue(hasattr(controller, 'faucet'))
         self.assertTrue(hasattr(controller, 'faucets'))
         self.assertTrue(hasattr(controller, 'id'))
-        self.assertTrue(hasattr(controller, 'lookup_attr'))
         self.assertTrue(hasattr(controller, 'name'))
         self.assertTrue(hasattr(controller, 'post'))
         self.assertTrue(hasattr(controller, 'serial'))

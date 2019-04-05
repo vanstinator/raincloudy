@@ -15,7 +15,7 @@ import requests_mock
 from tests.extras import load_fixture, USERNAME, PASSWORD
 
 from raincloudy.const import (
-    LOGIN_ENDPOINT, DAJAXICE_ENDPOINT, HOME_ENDPOINT)
+    LOGIN_ENDPOINT, STATUS_ENDPOINT, HOME_ENDPOINT, SETUP_ENDPOINT)
 
 
 class UnitTestBase(unittest.TestCase):
@@ -28,10 +28,13 @@ class UnitTestBase(unittest.TestCase):
 
         mock.get(LOGIN_ENDPOINT,
                  text=load_fixture('home.html'))
+        mock.get(SETUP_ENDPOINT,
+                 text=load_fixture('setup.html'))
+        mock.get(STATUS_ENDPOINT,
+                 text=load_fixture('get_cu_and_fu_status.json'))
+
         mock.post(LOGIN_ENDPOINT,
                   text=load_fixture('home.html'))
-        mock.post(DAJAXICE_ENDPOINT,
-                  text=load_fixture('get_cu_and_fu_status.json'))
         mock.get(HOME_ENDPOINT,
                  text=load_fixture('home.html'))
 

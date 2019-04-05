@@ -4,9 +4,9 @@
 import raincloudy
 from raincloudy.faucet import RainCloudyFaucet
 from raincloudy.const import (
-    DAJAXICE_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
+    STATUS_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
 from raincloudy.helpers import (
-    generate_soup_html, find_attr, find_controller_or_faucet_name)
+    generate_soup_html, find_controller_or_faucet_name)
 
 
 class RainCloudyController(object):
@@ -78,21 +78,18 @@ class RainCloudyController(object):
             self.update()
 
     def _get_cu_and_fu_status(self):
-        """Submit POST request to update information."""
+        """Submit GET request to update information."""
         # adjust headers
         headers = HEADERS.copy()
         headers['Accept'] = '*/*'
         headers['X-Requested-With'] = 'XMLHttpRequest'
         headers['X-CSRFToken'] = self._parent.csrftoken
 
-        # example {"controller_serial":"12345","faucet_serial":"abcd"}
-        argv = '{"controller_serial":"' + self.serial + \
-               '","faucet_serial":"' + self.faucet.serial + '"}'
-        post_data = {'argv': argv}
+        args = '?controller_serial=' + self.serial \
+               + '&faucet_serial=' + self.faucet.serial
 
-        req = self._parent.client.post(DAJAXICE_ENDPOINT,
-                                       data=post_data,
-                                       headers=headers)
+        req = self._parent.client.get(STATUS_ENDPOINT + args,
+                                      headers=headers)
 
         # token probably expired, then try again
         if req.status_code == 403:
@@ -129,10 +126,6 @@ class RainCloudyController(object):
         # auto_watering status (program_toggle tag)
         self._refresh_html_home()
 
-    def lookup_attr(self, key):
-        """Callback for find_attr method."""
-        return find_attr(self.attributes, key)
-
     @property
     def serial(self):
         """Return controller id."""
@@ -163,12 +156,12 @@ class RainCloudyController(object):
     @property
     def status(self):
         """Return controller status."""
-        return self.lookup_attr('controller_online')
+        return self.attributes['controller_status']
 
     @property
     def current_time(self):
         """Return controller current time."""
-        return self.lookup_attr('current_time')
+        return self.attributes['current_time']
 
     @property
     def faucet(self):

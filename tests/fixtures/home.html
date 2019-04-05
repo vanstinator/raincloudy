@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,12 +12,12 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.js"></script>
 <script type="text/javascript" src="/static/js/jquery.ba-serializeobject.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.qtip.js"></script>
-<script type="text/javascript" src="/static/js/melnor.js"></script>
+<script type="text/javascript" src="/static/js/melnor.js?12345"></script>
 <script type="text/javascript" src="/static/js/enterastab.js"></script>
 
 <!-- Include for Dajaxice -->
-<script src="/static/js/jquery.dajax.core.js" type="text/javascript"></script>
-<script src="/static/js/dajaxice.core.js" type="text/javascript"></script>
+<!-- <script src="/static/js/jquery.dajax.core.js" type="text/javascript"></script> -->
+<!-- <script src="/static/js/dajaxice.core.js" type="text/javascript"></script> -->
 <!--<script src="/static/js/dajaxice_module_loop.js" type="text/javascript"></script>-->
 <!--<script src="/static/js/dajaxice_function_loop.js" type="text/javascript"></script>-->
 <!-- <script src="/static/js/jquery.dajax.core.js" type="text/javascript"></script> -->
@@ -42,6 +39,7 @@ Spry.Utils.addLoadListener(function() {
 </script>
 
 <!-- Refresh the page using AJAX -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <script type="text/javascript">
 function my_js_callback(data){
     alert(data.message);
@@ -49,8 +47,367 @@ function my_js_callback(data){
 
 // AJAX: on a regular interval update all elements, currently every 15 seconds
 $( document ).ready(function() {
+
     setInterval(function () {
-                Dajaxice.webserver.get_cu_and_fu_status(Dajax.process, {'controller_serial': 'ABCDEFGH', 'faucet_serial': '1234'}); }, 15000)
+               var selected_cntrlr = document.getElementById("id_select_controller");
+				var controller_serial = selected_cntrlr.options[selected_cntrlr.selectedIndex].text;
+
+				var selected_faucet = document.getElementById("id_select_faucet");
+				var faucet_serial = selected_faucet.options[selected_faucet.selectedIndex].text;
+
+
+
+
+
+		$.ajax({
+			url: '/get_cu_and_fu_status',
+			type:'GET',
+			data:{
+				'controller_serial': controller_serial,
+				'faucet_serial' : faucet_serial,
+
+
+			},
+			dataType: 'json',
+			success: function(data) {
+				//Switching controller and faucet status
+				console.log(data);
+				$("#controller_online").text(data.controller_status);
+				if(data.channel_occupied ){
+					$("#controller_online").removeClass("controller_label_offline");
+					$("#controller_online").addClass("controller_label_online");
+				}else {
+					$("#controller_online").removeClass("controller_label_online");
+					$("#controller_online").addClass("controller_label_offline");
+				}
+
+				if(data.rf_link){
+					$("#faucet_online").removeClass("faucet_label_offline");
+					$("#faucet_online").addClass("faucet_label_online");
+				}else {
+					$("#faucet_online").removeClass("faucet_label_online");
+					$("#faucet_online").addClass("faucet_label_offline");
+				}
+
+				$("#faucet_online").text(data.faucet_status);
+
+				//Displaying moisture sensor imaged based on moisture sensor is active or not
+				if(data.moisture_sensor_operable){
+					if($("#id_zone1_rain_delay_select option[value='auto']").length > 0){
+						$("#id_zone1_rain_delay_select").append('<option value="auto" >SENSOR</option>');
+					}
+					if($("#id_zone2_rain_delay_select option[value='auto']").length > 0){
+						$("#id_zone2_rain_delay_select").append('<option value="auto" >SENSOR</option>');
+					}
+					if($("#id_zone3_rain_delay_select option[value='auto']").length > 0){
+						$("#id_zone3_rain_delay_select").append('<option value="auto" >SENSOR</option>');
+					}
+					if($("#id_zone4_rain_delay_select option[value='auto']").length > 0){
+						$("#id_zone4_rain_delay_select").append('<option value="auto" >SENSOR</option>');
+					}
+
+				}else{
+					if($("#id_zone1_rain_delay_select option[value='auto']").length > 0){
+					$("#id_zone1_rain_delay_select option[value='auto']").remove();
+					}
+					if($("#id_zone2_rain_delay_select option[value='auto']").length > 0){
+					$("#id_zone2_rain_delay_select option[value='auto']").remove();
+					}
+					if($("#id_zone3_rain_delay_select option[value='auto']").length > 0){
+					$("#id_zone3_rain_delay_select option[value='auto']").remove();
+					}
+					if($("#id_zone4_rain_delay_select option[value='auto']").length > 0){
+					$("#id_zone4_rain_delay_select option[value='auto']").remove();
+					}
+				}
+
+				$("#moisture_sensor_img").attr("src",data.moisture_sensor_graphic);
+
+				//Displaying VU battery level
+				var battery_level = parseInt(data.battery_percent.slice(0,-1));
+				if(battery_level === 0){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_000.png");
+				}else if(battery_level > 0 && battery_level <= 10){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_025.png");
+				}else if(battery_level > 10 && battery_level <= 25){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_035.png");
+				}else if(battery_level > 25 && battery_level <= 50){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_050.png");
+				}else if(battery_level > 50 && battery_level <= 75){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_075.png");
+				}else if(battery_level > 75){
+					$("#battery_level_icon").attr("src", "/static/images/battery_discharging_100.png");
+				}
+
+				//Update=ing battery percent text
+				$("#active_faucet_battery_level").text(data.battery_percent);
+
+				//Updating current time
+				$("#current_time").text(data.current_time);
+
+				//Displaying droplets based on is-watering varibale and manual mode for all zones
+				if(data.rain_delay_mode[0].is_watering ){
+					$("#droplet_zone_0").attr("src", "/static/images/droplet.svg").show();
+				}else if(!data.rain_delay_mode[0].is_watering && data.rain_delay_mode[0].manual_mode_on){
+					$("#droplet_zone_0").attr("src", "/static/images/droplet2.svg").show();
+				}else if(!data.rain_delay_mode[0].is_watering && !data.rain_delay_mode[0].manual_mode_on){
+					$("#droplet_zone_0").attr("src", "/static/images/blank.gif").hide();
+				}
+
+				if(data.rain_delay_mode[1].is_watering ){
+					$("#droplet_zone_1").attr("src", "/static/images/droplet.svg").show();
+				}else if(!data.rain_delay_mode[1].is_watering && data.rain_delay_mode[1].manual_mode_on){
+					$("#droplet_zone_1").attr("src", "/static/images/droplet2.svg").show();
+				}else if(!data.rain_delay_mode[1].is_watering && !data.rain_delay_mode[1].manual_mode_on){
+					$("#droplet_zone_1").attr("src", "/static/images/blank.gif").hide();
+				}
+
+				if(data.rain_delay_mode[2].is_watering ){
+					$("#droplet_zone_2").attr("src", "/static/images/droplet.svg").show();
+				}else if(!data.rain_delay_mode[2].is_watering && data.rain_delay_mode[2].manual_mode_on){
+					$("#droplet_zone_2").attr("src", "/static/images/droplet2.svg").show();
+				}else if(!data.rain_delay_mode[2].is_watering && !data.rain_delay_mode[2].manual_mode_on){
+					$("#droplet_zone_2").attr("src", "/static/images/blank.gif").hide();
+				}
+
+				if(data.rain_delay_mode[3].is_watering ){
+					$("#droplet_zone_3").attr("src", "/static/images/droplet.svg").show();
+				}else if(!data.rain_delay_mode[3].is_watering && data.rain_delay_mode[3].manual_mode_on){
+					$("#droplet_zone_3").attr("src", "/static/images/droplet2.svg").show();
+				}else if(!data.rain_delay_mode[3].is_watering && !data.rain_delay_mode[3].manual_mode_on){
+					$("#droplet_zone_3").attr("src", "/static/images/blank.gif").hide();
+				}
+
+
+				//toggling Auto mode
+				if(data.rain_delay_mode[0].program_mode_on){
+
+					$( "#id_zone1_program_toggle" ).attr( "checked", "checked" );
+				}else{
+					$( "#id_zone1_program_toggle" ).removeAttr("checked");
+				}
+
+
+				//checkign if manual mode is on then we are updating the time countdown and setting manual mode off when the selcted manual watering time is over
+				if(data.rain_delay_mode[0].manual_mode_on){
+
+					<!-- $("#droplet_zone_0").attr("src", "/static/images/droplet.svg").show(); -->
+
+					$("#zone_0_watering_time").text(data.rain_delay_mode[0].manual_watering_time);
+
+					setTimeout(function() {
+
+						$( "#id_select_manual_mode_0 " ).val('OFF');
+
+					}, (parseInt(data.rain_delay_mode[0].manual_watering_time)+1)*60000);
+
+				}else if(data.rain_delay_mode[0].program_mode_on){
+					<!-- $("#droplet_zone_0").attr("src", "/static/images/droplet.svg").show(); -->
+					$("#zone_0_watering_time").text(data.rain_delay_mode[0].auto_watering_time);
+				}else{
+					$("#droplet_zone_0").attr("src", "/static/images/droplet.svg").hide();
+				}
+				if(data.rain_delay_mode[1].manual_mode_on){
+
+					$("#droplet_zone_1").attr("src", "/static/images/droplet.svg").show();
+
+					$("#zone_1_watering_time").text(data.rain_delay_mode[1].manual_watering_time);
+
+					setTimeout(function() {
+						$( "#id_select_manual_mode_1").val('OFF');
+
+					}, (parseInt(data.rain_delay_mode[1].manual_watering_time)+1)*60000);
+
+				}else{
+					<!-- $("#droplet_zone_1").attr("src", "/static/images/droplet.svg").show(); -->
+					$("#zone_1_watering_time").text(data.rain_delay_mode[1].auto_watering_time);
+				}
+				if(data.rain_delay_mode[2].manual_mode_on){
+
+					<!-- $("#droplet_zone_2").attr("src", "/static/images/droplet.svg").show(); -->
+
+					$("#zone_2_watering_time").text(data.rain_delay_mode[2].manual_watering_time);
+
+					setTimeout(function() {
+
+						$( "#id_select_manual_mode_2 " ).val('OFF');
+
+					}, (parseInt(data.rain_delay_mode[2].manual_watering_time)+1)*60000);
+
+				}else{
+					$("#zone_2_watering_time").text(data.rain_delay_mode[2].auto_watering_time);
+					<!-- $("#droplet_zone_2").attr("src", "/static/images/droplet.svg").show(); -->
+				}
+				if(data.rain_delay_mode[3].manual_mode_on){
+
+					<!-- $("#droplet_zone_3").attr("src", "/static/images/droplet.svg").show(); -->
+
+					$("#zone_3_watering_time").text(data.rain_delay_mode[3].manual_watering_time);
+
+					setTimeout(function() {
+
+						$( "#id_select_manual_mode_3 " ).val('OFF');
+
+					}, (parseInt(data.rain_delay_mode[3].manual_watering_time)+1)*60000);
+
+				}else{
+					$("#zone_3_watering_time").text(data.rain_delay_mode[3].auto_watering_time);
+					<!-- $("#droplet_zone_3").attr("src", "/static/images/droplet.svg").show(); -->
+
+				}
+
+				$("#zone_0_countdown_time").text(data.rain_delay_mode[0].next_water_cycle);
+				$("#zone_1_countdown_time").text(data.rain_delay_mode[1].next_water_cycle);
+				$("#zone_2_countdown_time").text(data.rain_delay_mode[2].next_water_cycle);
+				$("#zone_3_countdown_time").text(data.rain_delay_mode[3].next_water_cycle);
+
+				if(data.moisture_sensor_operable){
+
+					if(data.rain_delay_mode[0].rain_delay_mode === 0){
+						$("#id_zone1_rain_delay_select").val("off");
+					}else{
+						var numOfDays = data.rain_delay_mode[0].rain_delay_mode ;
+						if(numOfDays === 1){
+							$("#id_zone1_rain_delay_select").val("auto") ;
+						}else{
+							if(numOfDays === 2){
+								$("#id_zone1_rain_delay_select").val(String(data.rain_delay_mode[0].rain_delay_mode - 1) + "day");
+							}else{
+								$("#id_zone1_rain_delay_select").val(String(data.rain_delay_mode[0].rain_delay_mode - 1) + "days");
+							}
+						}
+
+
+					}
+					if(data.rain_delay_mode[0].rain_delay_mode === 0){
+						$("#id_zone1_rain_delay_select").val("off");
+					}else{
+						var numOfDays = data.rain_delay_mode[1].rain_delay_mode ;
+						if(numOfDays === 1){
+							$("#id_zone2_rain_delay_select").val("auto") ;
+						}else{
+							if(numOfDays === 2){
+								$("#id_zone2_rain_delay_select").val(String(data.rain_delay_mode[1].rain_delay_mode - 1) + "day");
+							}else{
+								$("#id_zone2_rain_delay_select").val(String(data.rain_delay_mode[1].rain_delay_mode - 1) + "days");
+							}
+						}
+
+
+					}
+					if(data.rain_delay_mode[0].rain_delay_mode === 0){
+						$("#id_zone1_rain_delay_select").val("off");
+					}else{
+						var numOfDays = data.rain_delay_mode[2].rain_delay_mode ;
+						if(numOfDays === 1){
+							$("#id_zone3_rain_delay_select").val("auto") ;
+						}else{
+							if(numOfDays === 2){
+								$("#id_zone3_rain_delay_select").val(String(data.rain_delay_mode[2].rain_delay_mode - 1) + "day");
+							}else{
+								$("#id_zone3_rain_delay_select").val(String(data.rain_delay_mode[2].rain_delay_mode - 1) + "days");
+							}
+						}
+
+
+					}
+					if(data.rain_delay_mode[0].rain_delay_mode === 0){
+						$("#id_zone1_rain_delay_select").val("off");
+					}else{
+						var numOfDays = data.rain_delay_mode[3].rain_delay_mode ;
+						if(numOfDays === 1){
+							$("#id_zone4_rain_delay_select").val("auto") ;
+						}else{
+							if(numOfDays === 2){
+								$("#id_zone4_rain_delay_select").val(String(data.rain_delay_mode[3].rain_delay_mode - 1) + "day");
+							}else{
+								$("#id_zone4_rain_delay_select").val(String(data.rain_delay_mode[3].rain_delay_mode - 1) + "days");
+							}
+						}
+
+
+					}
+
+
+
+
+
+
+					<!-- if(data.rain_delay_mode[1].rain_delay_mode === 0){ -->
+						<!-- $("#id_zone2_rain_delay_select").val("off"); -->
+					<!-- }else{ -->
+						<!-- var numOfDays = String(data.rain_delay_mode[1].rain_delay_mode) + "days"; -->
+						<!-- $("#id_zone2_rain_delay_select").val(String(data.rain_delay_mode[1].rain_delay_mode) + "days"); -->
+					<!-- } -->
+					<!-- if(data.rain_delay_mode[2].rain_delay_mode === 0){ -->
+						<!-- $("#id_zone3_rain_delay_select").val("off"); -->
+					<!-- }else{ -->
+						<!-- var numOfDays = String(data.rain_delay_mode[2].rain_delay_mode) + "days"; -->
+						<!-- $("#id_zone3_rain_delay_select").val(String(data.rain_delay_mode[2].rain_delay_mode) + "days"); -->
+					<!-- } -->
+					<!-- if(data.rain_delay_mode[3].rain_delay_mode === 0){ -->
+						<!-- $("#id_zone4_rain_delay_select").val("off"); -->
+					<!-- }else{ -->
+						<!-- var numOfDays = String(data.rain_delay_mode[3].rain_delay_mode) + "days"; -->
+						<!-- $("#id_zone4_rain_delay_select").val(String(data.rain_delay_mode[3].rain_delay_mode) + "days"); -->
+					<!-- } -->
+					}
+				else{
+					if(data.rain_delay_mode[0].rain_delay_mode === 0){
+						$("#id_zone1_rain_delay_select").val("off");
+					}else{
+						if(data.rain_delay_mode[0].rain_delay_mode === 1){
+							var numOfDays = String(data.rain_delay_mode[0].rain_delay_mode) + "day";
+						}else{
+							var numOfDays = String(data.rain_delay_mode[0].rain_delay_mode) + "days";
+						}
+
+						$("#id_zone1_rain_delay_select").val(numOfDays);
+					}
+
+					if(data.rain_delay_mode[1].rain_delay_mode === 0){
+						$("#id_zone2_rain_delay_select").val("off");
+					}else{
+						if(data.rain_delay_mode[1].rain_delay_mode === 1){
+							var numOfDays = String(data.rain_delay_mode[1].rain_delay_mode) + "day";
+						}
+						else{
+							var numOfDays = String(data.rain_delay_mode[1].rain_delay_mode) + "days";
+						}
+						$("#id_zone2_rain_delay_select").val(numOfDays);
+					}
+					if(data.rain_delay_mode[2].rain_delay_mode === 0){
+						$("#id_zone3_rain_delay_select").val("off");
+					}else{
+						if(data.rain_delay_mode[2].rain_delay_mode === 1){
+							var numOfDays = String(data.rain_delay_mode[2].rain_delay_mode) + "day";
+						}
+						else{
+							var numOfDays = String(data.rain_delay_mode[2].rain_delay_mode) + "days";
+						}
+						$("#id_zone3_rain_delay_select").val(numOfDays);
+					}
+					if(data.rain_delay_mode[3].rain_delay_mode === 0){
+						$("#id_zone4_rain_delay_select").val("off");
+					}else{
+						if(data.rain_delay_mode[3].rain_delay_mode === 1){
+							var numOfDays = String(data.rain_delay_mode[3].rain_delay_mode) + "day";
+						}
+						else{
+							var numOfDays = String(data.rain_delay_mode[3].rain_delay_mode) + "days";
+						}
+
+						$("#id_zone4_rain_delay_select").val(numOfDays);
+					}
+				}
+
+
+			},
+			failure: function(data) {
+				console.log('Got an error ');
+			}
+		})
+    }, 15000)
 });
 </script>
 
@@ -61,7 +418,7 @@ $( document ).ready(function() {
 </head>
 <body class="status" id="home">
 
-    
+    <!--  -->
     <form action="/home" method="post" id="configure_form">
     <input type='hidden' name='csrfmiddlewaretoken' value='AbCdEFJeCDnkC2pdmrywqBAbN9999999' />
 
@@ -81,74 +438,70 @@ $( document ).ready(function() {
 
 
 <ul id="MenuBar1" class="MenuBarHorizontal">
-    
-        
-        <li id="menu_id_home"><a href="/home">Home</a></li>
-    
-        
-        <li id="menu_id_setup"><a href="/setup/">Setup</a></li>
-    
-        
-        <li id="menu_id_program"><a href="/program/">Program</a></li>
-    
-        
-        <li id="menu_id_manage"><a href="/manage/">Manage</a></li>
-    
-        
-        <li id="menu_id_logout"><a href="/logout">Logout</a></li>
-    
-</ul> </center>
+<li><a href = "/home" >Home</a></li>
+<li><a href = "/setup" >Setup</a></li>
+<li><a href = "/program" >Program</a></li>
+<li><a href = "/manage" >Manage</a></li>
+<li><a href = "/logout">Logout</a></li>
+
+
+</ul></center>
 </div>
 <div id="InnerContainer">
 <div id="LayoutDiv3">
     <!-- Weather -->
-    
+
         <table border="0" class="weather_table">
             <tr>
                 <td id="ICcol1">
     <!-- current time -->
     <!-- Only show the current time if it is defined -->
-    
+
         <label><span class="more_info" id="#styling-type-light" data-hasqtip="32" title="Current time of the selected controller">Time</span></label></td>
                 <td>Today</td>
-                
-                    
+
+
                 <td>Sat</td>
-                    
+
                 <td>Sun</td>
-                    
+
                 <td>Mon</td>
-                    
-                
+
+
             </tr>
             <tr>
-            		<td id="ICcol1"><label class="unselectable" id="current_time">01:28 AM</label></td>
-    
-                
+            		<td id="ICcol1"><label class="unselectable" id="current_time">09:01 AM</label></td>
+
+
                     <td><img src="/static/images/10d.svg" /><br>
-                    75 - 72°</td>
-                
+                    55 - 35°</td>
+
+                    <td><img src="/static/images/01d.svg" /><br>
+                    66 - 34°</td>
+
                     <td><img src="/static/images/10d.svg" /><br>
-                    80 - 73°</td>
-                
-                    <td><img src="/static/images/10d.svg" /><br>
-                    85 - 73°</td>
-                
-                    <td><img src="/static/images/10d.svg" /><br>
-                    85 - 74°</td>
-                
+                    69 - 50°</td>
+
+                    <td><img src="/static/images/02d.svg" /><br>
+                    55 - 42°</td>
+
             </tr>
         </table>
-    
+
     <!--
     <br/>
     <br/>
     <!-- In order to align the text in the textarea properly, the whitespace must be exactly as what is used here -->
     <!--<textarea rows="5" cols="25" style="text-align:left;" readonly="yes" wrap="hard">[[u&#39;12 - 34\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;21 - 39\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;27 - 36\xb0&#39;, u&#39;mcloudy.png&#39;], [u&#39;30 - 46\xb0&#39;, u&#39;pcloudy.png&#39;], [u&#39;36 - 54\xb0&#39;, u&#39;mcloudy.png&#39;]]</textarea>
     <label for="placeholder"></label>
-    -->    
+    -->
 </div>
 <hr style="clear:both;">
+
+<!-- Temporary High Volume Alert
+<p class="warning" style="color:green;">Attention all users:  We are experiencing extremely high volume and there is a risk of intermittent issues.  It will return to normal shortly and we apologize for the inconvenience.</p>
+-->
+
 <div id="LayoutDiv4">
 
 <!-- Help Button -->
@@ -158,30 +511,30 @@ $( document ).ready(function() {
    <div class="controlunit">
    <label for="select_controller"><span class="more_info" id="#styling-type-light" data-hasqtip="26" title="Select Control Unit to display." >Control Unit:</span></label><br/>
     <select class="simpleselect" id="id_select_controller" name="select_controller" onchange="submit()" >
-        
-            
+
+
                 <option value="0" selected="selected">Controller001
-            
-        
-    </select>    
+
+
+    </select>
 <!-- Display a text control UNDER to it with online/offline status -->
     <br />
    <!-- Show the controller as online/offline with appropriate styling rules -->
-   
+
        <!-- <label id="controller_online" class="testing" style="background: #6BBF3F;color: white;padding: 2px;padding-left: 4px;padding-right: 4px;">Online</label> -->
        <label id="controller_online" class="controller_label_online">Online</label>
-   
+
 
     <label for="placeholder"></label>
     </div>
-     
+
 <!-- Battery Status -->
 	<div id="batteryindicator">
     <label for="faucet_battery_status"></label><center id="battery_level">
-    
-        <img id="battery_level_icon" src="/static/images/blank.gif"/><br/>
-        <label id="active_faucet_battery_level"></label>
-    
+
+        <img id="battery_level_icon" src="/static/images/battery_discharging_075.png"/><br/>
+        <label id="active_faucet_battery_level">66%</label>
+
     </center>
     </div>
 
@@ -189,19 +542,19 @@ $( document ).ready(function() {
     <div class="valveunit">
     <label for="id_select_faucet"><span class="more_info" data-hasqtip="59" title="Select Valve Unit to display" >Valve Unit:</span></label><br/>
     <select class="simpleselect" id="id_select_faucet" name="select_faucet" onchange="submit()" >
-        
-            
+
+
                 <option value="0" selected="selected">Faucet001
-            
-        
+
+
     </select>
 <!-- Display a text control UNDER to it with online/offline status -->
 	<br />
     <!-- Show appropriate text for whether it is online or offline with appropriate styling rules -->
-    
-        <!-- <label id="faucet_online" style="background: #ffe100;color: black;padding: 2px;padding-left: 4px;padding-right: 4px;">Offline</label> -->
-        <label id="faucet_online" class="faucet_label_offline">Online</label>
-    
+
+        <!-- <label id="faucet_online" style="background: #6BBF3F;color: white;padding: 2px;padding-left: 4px;padding-right: 4px;">Online</label> -->
+        <label id="faucet_online" class="faucet_label_online">Online</label>
+
     </div>
 
 <!-- AquaSentry Status -->
@@ -209,15 +562,15 @@ $( document ).ready(function() {
 	<div id="AquaSentryIconDiv">
     <center>
         <!-- Depending on moisture sensor status, show it or not for the current faucet -->
-        
+
             <img class="aquasentry" src="/static/images/aquasentryOFF.svg" id="moisture_sensor_img"/>
-        
+
     </center>
-    </div>    
     </div>
-    
+    </div>
+
 <!-- Zone status -->
-        
+
 
 <!-- Valve Unit SVG Grid -->
 		 <div id="UnitImage">
@@ -237,15 +590,15 @@ $( document ).ready(function() {
         <div class="row5col4" style="left:20.5%;">
             <div id="droplet" class="droplet"><img id="droplet_zone_0" src="/static/images/blank.gif" /></div>
 		</div>
-        
+
         <div class="row5col4" style="left:40.25%;">
 			<div id="droplet" class="droplet"><img id="droplet_zone_1" src="/static/images/blank.gif" /></div>
 	    </div>
-        
+
         <div class="row5col4" style="left:60%;">
 			<div id="droplet" class="droplet"><img id="droplet_zone_2" src="/static/images/blank.gif" /></div>
 		</div>
-        
+
         <div class="row5col4" style="left:79.5%;">
 			<div id="droplet" class="droplet"><img id="droplet_zone_3" src="/static/images/blank.gif" /></div>
         </div>
@@ -258,29 +611,29 @@ $( document ).ready(function() {
 <div id="LayoutDiv5">
 <!-- Zone Details -->
 <!--  <h4><span class="more_info" data-hasqtip="70" oldtitle="Shows all zones attached to the current faucet with various settings available to change" title="">Zone Details</span></h4> -->
-        
+
         <table border="0" class="zone_table">
         <!-- Zone header row -->
         <tbody><tr style="font-weight:bold;">
           <td align="center" valign="middle" id="ICcol1"><h2>Zone</h2></td>
-        
-        
-            
+
+
+
                 <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">1 - Front Yard</span></td>
-            
-        
-            
-                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">2 - Backyard Zone2</span></td>
-            
-        
-            
-                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">3 - Trees Fence</span></td>
-            
-        
-            
-                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">4 - Backyard Zone1</span></td>
-            
-        
+
+
+
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">2</span></td>
+
+
+
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">3</span></td>
+
+
+
+                <td align="center"><span class="more_info" title="Zone can be renamed on Setup tab">4</span></td>
+
+
         </tr>
         </tbody>
         </table>
@@ -291,7 +644,7 @@ $( document ).ready(function() {
         <tbody><tr style="font-weight:bold;">
         <!-- Set Manual Time row -->
         <tr><td align="center" valign="middle"><span class="more_info" data-hasqtip="127" title="Water manually for up to 60 minutes." ><h2>Manual</h2></span></td>
-        
+
             <td align="center">
                 <select class="simpleselect" id="id_select_manual_mode_0" name="zone1_select_manual_mode" onchange="submit()">
                 <option value="OFF" selected="selected">OFF</option>
@@ -305,7 +658,7 @@ $( document ).ready(function() {
                 <option value="60" >60</option>
                 </select>
             </td>
-        
+
             <td align="center">
                 <select class="simpleselect" id="id_select_manual_mode_1" name="zone2_select_manual_mode" onchange="submit()">
                 <option value="OFF" selected="selected">OFF</option>
@@ -319,7 +672,7 @@ $( document ).ready(function() {
                 <option value="60" >60</option>
                 </select>
             </td>
-        
+
             <td align="center">
                 <select class="simpleselect" id="id_select_manual_mode_2" name="zone3_select_manual_mode" onchange="submit()">
                 <option value="OFF" selected="selected">OFF</option>
@@ -333,7 +686,7 @@ $( document ).ready(function() {
                 <option value="60" >60</option>
                 </select>
             </td>
-        
+
             <td align="center">
                 <select class="simpleselect" id="id_select_manual_mode_3" name="zone4_select_manual_mode" onchange="submit()">
                 <option value="OFF" selected="selected">OFF</option>
@@ -347,7 +700,7 @@ $( document ).ready(function() {
                 <option value="60" >60</option>
                 </select>
             </td>
-        
+
         </tr>
         </tbody>
         </table>
@@ -359,66 +712,66 @@ $( document ).ready(function() {
         <!-- Edit zone row -->
         <tr>
         <td align="center" valign="middle"><span class="more_info" title="Program runs when on. No watering when off."><h2>Auto</h2></span></td>
-        
+
         <td align="center">
         <div class="">
         <input class="switch" id="id_zone1_program_toggle" type="checkbox" name="zone1_program_toggle"  onchange="submit()">
                 <label for="id_zone1_program_toggle">&nbsp;</label>
         </div>
         </td>
-		
+
         <td align="center">
         <div class="">
         <input class="switch" id="id_zone2_program_toggle" type="checkbox" name="zone2_program_toggle"  onchange="submit()">
                 <label for="id_zone2_program_toggle">&nbsp;</label>
         </div>
         </td>
-		
+
         <td align="center">
         <div class="">
         <input class="switch" id="id_zone3_program_toggle" type="checkbox" name="zone3_program_toggle"  onchange="submit()">
                 <label for="id_zone3_program_toggle">&nbsp;</label>
         </div>
         </td>
-		
+
         <td align="center">
         <div class="">
         <input class="switch" id="id_zone4_program_toggle" type="checkbox" name="zone4_program_toggle"  onchange="submit()">
                 <label for="id_zone4_program_toggle">&nbsp;</label>
         </div>
         </td>
-		
+
         </tr>
         <!-- Edit zone row -->
         <tr><td align="center" valign="middle"><span class="more_info" data-hasqtip="116" title="Create or change a program." ><h3>Edit</h3></span></td>
-        
+
             <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_0" id="edit_zone" value="Edit" >
             </td>
 
-        
+
             <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_1" id="edit_zone" value="Edit" >
             </td>
 
-        
+
             <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_2" id="edit_zone" value="Edit" >
             </td>
 
-        
+
             <td align="center"><input class="simpleselect" type="submit" name="_edit_zone_3" id="edit_zone" value="Edit" >
             </td>
 
-        
+
         </tr>
 
         <!-- Set rain delay master mode -->
         <tr>
             <td align="center" valign="middle"><span class="more_info" data-hasqtip="149" title="<h3>How long to skip watering.  For Automatic Rain Delay visit www.melnor.com/raindelay" ><h3>Rain Delay</h3></span></td>
-            
+
                 <td align="center">
                     <select class="simpleselect" name="zone0_rain_delay_select" id="id_zone1_rain_delay_select" onchange="submit()">
-                        <option value="off" >OFF</option>
+                        <option value="off" selected="selected">OFF</option>
                         <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
-                        
+
                         <option value="1day" >1 DAY</option>
                         <option value="2days" >2 DAYS</option>
                         <option value="3days" >3 DAYS</option>
@@ -428,12 +781,12 @@ $( document ).ready(function() {
                         <option value="7days" >7 DAYS</option>
                     </select>
                </td>
-            
+
                 <td align="center">
                     <select class="simpleselect" name="zone1_rain_delay_select" id="id_zone2_rain_delay_select" onchange="submit()">
                         <option value="off" selected="selected">OFF</option>
                         <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
-                        
+
                         <option value="1day" >1 DAY</option>
                         <option value="2days" >2 DAYS</option>
                         <option value="3days" >3 DAYS</option>
@@ -443,12 +796,12 @@ $( document ).ready(function() {
                         <option value="7days" >7 DAYS</option>
                     </select>
                </td>
-            
+
                 <td align="center">
                     <select class="simpleselect" name="zone2_rain_delay_select" id="id_zone3_rain_delay_select" onchange="submit()">
                         <option value="off" selected="selected">OFF</option>
                         <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
-                        
+
                         <option value="1day" >1 DAY</option>
                         <option value="2days" >2 DAYS</option>
                         <option value="3days" >3 DAYS</option>
@@ -458,12 +811,12 @@ $( document ).ready(function() {
                         <option value="7days" >7 DAYS</option>
                     </select>
                </td>
-            
+
                 <td align="center">
                     <select class="simpleselect" name="zone3_rain_delay_select" id="id_zone4_rain_delay_select" onchange="submit()">
                         <option value="off" selected="selected">OFF</option>
                         <!-- Only show the rain delay "SENSOR" mode if there is an operable moisture sensor connected to the zone's parent valve -->
-                        
+
                         <option value="1day" >1 DAY</option>
                         <option value="2days" >2 DAYS</option>
                         <option value="3days" >3 DAYS</option>
@@ -473,41 +826,41 @@ $( document ).ready(function() {
                         <option value="7days" >7 DAYS</option>
                     </select>
                </td>
-            
+
         </tr>
 
         <!-- Show next water cycle time -->
         <tr>
             <td align="center" valign="middle"><span class="more_info" data-hasqtip="149" title="The next time this zone will water."><h3>Next Cycle</h3></span></td>
-            
+
                 <td align="center"><div>
-                    <label class="unselectable" id="zone_0_countdown_time">Delayed</label>
+                    <label class="unselectable" id="zone_0_countdown_time">Off</label>
                </div></td>
-            
+
                 <td align="center"><div>
                     <label class="unselectable" id="zone_1_countdown_time">Off</label>
                </div></td>
-            
+
                 <td align="center"><div>
                     <label class="unselectable" id="zone_2_countdown_time">Off</label>
                </div></td>
-            
+
                 <td align="center"><div>
                     <label class="unselectable" id="zone_3_countdown_time">Off</label>
                </div></td>
-            
+
         </tr>
         </tbody></table>
 </div>
 
-    
+
 
 <!-- Hide OTA controls
     <input type="submit" id="update_ota" name="update_ota" value="Update OTA">
     <select class="simpleselect" id="id_select_firmware_revision" name="select_firmware_revision" >
-        
+
             <option value="0313">rev_0313</option>
-        
+
     <input type="submit" id="detect_rev_ota" name="detect_rev_ota" name="detect_rev_ota" value="Test Auto-Detect">
     </select>
 <!-- End of OTA controls -->
@@ -520,11 +873,12 @@ $( document ).ready(function() {
 <!-- Copyright -->
 <span style="font-size:smaller; color:#ffffff;">Copyright &copy; 2016 Melnor, Inc. All Rights Reserved.&nbsp;Forecast by OpenWeatherMap</span>
 </center>
- 
+
 
 <script type="text/javascript">
 var MenuBar1 = new Spry.Widget.MenuBar("MenuBar1", {imgDown:"SpryAssets/SpryMenuBarDownHover.gif", imgRight:"SpryAssets/SpryMenuBarRightHover.gif"});
 </script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 
 </body>
 </html>

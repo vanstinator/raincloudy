@@ -3,7 +3,7 @@
 import requests_mock
 from tests.test_base import UnitTestBase
 from raincloudy.const import (
-    DAJAXICE_ENDPOINT, HOME_ENDPOINT, SETUP_ENDPOINT)
+    STATUS_ENDPOINT, HOME_ENDPOINT, SETUP_ENDPOINT)
 from tests.extras import load_fixture
 
 
@@ -12,12 +12,13 @@ class TestRainCloudyFaucet(UnitTestBase):
 
     @requests_mock.Mocker()
     def test_post_actions(self, mock):
-        """Test post actions."""
-        mock.post(DAJAXICE_ENDPOINT,
-                  text=load_fixture('get_cu_and_fu_status.json'))
+        """Test request actions."""
+        mock.get(STATUS_ENDPOINT,
+                 text=load_fixture('get_cu_and_fu_status.json'))
         mock.get(HOME_ENDPOINT,
                  text=load_fixture('home.html'))
         mock.post(SETUP_ENDPOINT)
+        mock.get(SETUP_ENDPOINT)
 
         faucet = self.rdy.controller.faucet
         self.assertIsNone(setattr(faucet, 'name', 'test'))

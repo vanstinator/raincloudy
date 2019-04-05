@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Raincloudy helpers."""
-import re
 from bs4 import BeautifulSoup
 from raincloudy.exceptions import RainCloudyException
 
@@ -15,61 +14,44 @@ def generate_soup_html(data):
 
 def serial_finder(data):
     """
-    Find controller serial and faucet_serial from the initial page.
+    Find controller serial and faucet_serial from the setup page.
+
+    <select id="id_select_controller2" name="select_controller" >
+        <option value='0' selected='selected'>1 - Controller001</option>
+    </select>
 
     :param data: text to be parsed
     :type data: BeautilSoup object
     :return: a dict with controller_serial and faucet_serial
     :rtype: dict
     :raises IndexError: if controller_serial was not found on the data
-
-    Many thanks to Pablo Hess <pablo@hess.net.br> for the regex filter
     """
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
     try:
-        child = data.find_all('script',
-                              text=re.compile('controller_serial'))[0]
 
-        # pylint: disable=line-too-long
-        regex = re.compile(r"controller_serial':\s*'(?P<controller_serial>\w*)',\s*'faucet_serial':\s*'(?P<faucet_serial>\w*)'") # noqa
-        result = regex.search(child.string).groupdict()
+        # The setup page contains a select box for each controller and each
+        # faucet
+        controllersElement = data.find_all('select',
+                                           {'id': 'id_select_controller2'})
+
+        faucetsElement = data.find_all('select',
+                                       {'id': 'id_select_faucet2'})
+
+        controllerSerial = controllersElement[0].text.split('-')[1].strip()
+        faucetSerial = faucetsElement[0].text.split('-')[1].strip()
 
         # currently only one faucet is supported on the code
         # we have plans to support it in the future
         parsed_dict = {}
-        parsed_dict['controller_serial'] = result['controller_serial']
-        parsed_dict['faucet_serial'] = [result['faucet_serial']]
+        parsed_dict['controller_serial'] = controllerSerial
+        parsed_dict['faucet_serial'] = [faucetSerial]
         return parsed_dict
 
     except (AttributeError, IndexError, ValueError):
         raise RainCloudyException(
             'Could not find any valid controller or faucet')
-
-
-def find_attr(data, key):
-    """
-    Find attribute based on a given key.
-    self._attributes has a dict list with objects
-    To acquire the current data, the dict must have ['cmd'] = 'as'
-
-    :param data: list of BeautifulSoup objects
-    :param key: html object identifier
-    :return: html object value
-    :rtype: str
-    :raises TypeError: if data is not a list
-    """
-    if not isinstance(data, list):
-        raise TypeError("Data must be a list.")
-
-    if not key.startswith('#'):
-        key = '#' + key
-
-    for member in data:
-        if member.get('cmd') == 'as' and member.get('id') == key:
-            return member.get('val')
-    return None
 
 
 def find_program_status(data, zone):

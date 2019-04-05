@@ -3,7 +3,7 @@
 import requests
 import urllib3
 from raincloudy.const import (
-    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
+    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT)
 from raincloudy.helpers import generate_soup_html, serial_finder
 from raincloudy.controller import RainCloudyController
 
@@ -91,12 +91,13 @@ class RainCloudy(object):
         if req.status_code != 302:
             req.raise_for_status()
 
+        setup = self.client.get(SETUP_ENDPOINT, headers=HEADERS)
         # populate device list
-        self.html['home'] = generate_soup_html(req.text)
+        self.html['setup'] = generate_soup_html(setup.text)
 
         # currently only one faucet is supported on the code
         # we have future plans to support it
-        parsed_controller = serial_finder(self.html['home'])
+        parsed_controller = serial_finder(self.html['setup'])
         self.controllers.append(
             RainCloudyController(
                 self,

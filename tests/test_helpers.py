@@ -25,12 +25,6 @@ class TestRainCloudyHelpers(UnitTestBase):
         broken_html = generate_soup_html(load_fixture('home_broken.html'))
         self.assertRaises(RainCloudyException, serial_finder, broken_html)
 
-    def test_find_attr(self):
-        """Test find_attr method."""
-        from raincloudy.helpers import find_attr
-
-        self.assertRaises(TypeError, find_attr, None, None)
-
     def test_find_program_status(self):
         """Test find_program_status method."""
         from raincloudy.helpers import find_program_status

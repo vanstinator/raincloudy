@@ -2,7 +2,7 @@
 """Constants used by RainCloudy."""
 
 API_URL = 'https://wifiaquatimer.com'
-DAJAXICE_ENDPOINT = API_URL + '/dajaxice/webserver.get_cu_and_fu_status/'
+STATUS_ENDPOINT = API_URL + '/get_cu_and_fu_status'
 HOME_ENDPOINT = API_URL + '/home'
 LOGIN_ENDPOINT = API_URL + '/login/'
 SETUP_ENDPOINT = API_URL + '/setup/'
