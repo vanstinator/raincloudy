@@ -27,7 +27,7 @@ def serial_finder(data):
     :raises IndexError: if controller_serial was not found on the data
     """
     if not isinstance(data, BeautifulSoup):
-        raise TypeError("Function requires BeautilSoup HTML element.")
+        raise TypeError("Function requires BeautifulSoup HTML element.")
 
     try:
 
