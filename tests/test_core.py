@@ -49,7 +49,7 @@ class TestRainCloudyCore(UnitTestBase):
         self.assertIsInstance(self.rdy.controller, RainCloudyController)
 
         self.assertIsInstance(self.rdy.html['home'], BeautifulSoup)
-        self.assertIsNone(self.rdy.html['setup'])
+        self.assertIsInstance(self.rdy.html['setup'], BeautifulSoup)
         self.assertIsNone(self.rdy.html['program'])
         self.assertIsNone(self.rdy.html['manage'])
 

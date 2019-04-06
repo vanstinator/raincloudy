@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/styles.css" type="text/css" />
+    <link rel="stylesheet" href="/static/css/jquery.qtip.css" type="text/css" />
+    <link rel="stylesheet" href="/static/css/boilerplate.css" type="text/css">
+    <link rel="stylesheet" href="/static/SpryAssets/SpryMenuBarHorizontal.css" type="text/css">
+    <script type="text/javascript" src="/static/js/respond.min.js"></script>
+    <script type="text/javascript" src="/static/SpryAssets/SpryMenuBar.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.qtip.js"></script>
+    <script type="text/javascript" src="/static/js/melnor.js"></script>
+    <script type="text/javascript" src="/static/js/enterastab.js"></script>
+
+    <script type="text/javascript" src="/static/SpryAssets/SpryDOMUtils.js"></script>
+    <script type="text/javascript">
+    // Load listener
+    Spry.Utils.addLoadListener(function() {
+        // Get all <a> elements in the menu
+        Spry.$$(".MenuBarHorizontal li a").forEach(function(e) {
+            // If page URL matches this <a> element
+            if((decodeURI(e.href)) == window.location) {
+                // Add class name to <a> element
+                Spry.Utils.addClassName(e, "MenuBarItemHover");
+            };
+        });
+    });
+    </script>
+</head>
+
+<body class="setup" id="setup">
+
+<div class="gridContainer clearfix" >
+
+<div id="Title1">
+<div style="float:left;width:50%;">
+<img src="/static/images/Melnorlogo_for_Website.svg" alt="melnor.com">
+</div>
+<div style="float:right;width:50%;text-align:right;">
+<img src="/static/images/RainCloud.svg" alt="melnor.com" style="margin-bottom:1%;"></center>
+</div>
+</div>
+
+<div id="LayoutDiv1">
+  <!-- Menu --> <center>
+
+
+<ul id="MenuBar1" class="MenuBarHorizontal">
+<li><a href = "/home" >Home</a></li>
+<li><a href = "/setup" >Setup</a></li>
+<li><a href = "/program" >Program</a></li>
+<li><a href = "/manage" >Manage</a></li>
+<li><a href = "/logout">Logout</a></li>
+
+    
+</ul> </center>
+</div>
+
+<div id="InnerContainer">
+
+<!-- Help Button -->
+	<div class="helpbutton2"><a href="/help"><img src="/static/images/help.svg" alt="help"></a></div>
+<!-- Begin Form -->
+	<div class="form">
+    <form action="/setup" method="post" id="configure_form">
+        <input type='hidden' name='csrfmiddlewaretoken' value='9Du8d2wNBcd1aNqux5WDf3651xBnbrV5PeyewkwXIfNADpJZwnjW8idOnSXLB7EE' />
+        
+<table>
+     <tr>
+     	<td class="COL-1">
+        <label for="select_controller"><span class="more_info" title="Select Control Unit to display.">Select Control Unit:</span></label>
+        </td>
+        <td>
+        <select id="id_select_controller2" name="select_controller" onchange="submit()" >
+            
+                
+                    <option value='0' selected='selected'>1 - ABCDEFGH</option>
+                
+            
+        </select>
+        <input type="submit" name="_set_default" value="Set Default" >
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+        
+        <label for="controller_name"><span class="more_info" title="Rename this Control Unit.  Press &#34;Set Name&#34; (Optional)">Control Unit Name:</span></label>
+        </td>
+        <td>
+        <input id="controller_name" name="controller_name" type="text" value="test1" />
+        <input type="submit" name="_set_controller_name" value="Set Name" >
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+
+        
+        <label for="zipcode"><span class="more_info" title="Postal code for Control Unit location.  Sets time zone and enables weather forecast.">Control Unit Postal Code:</span></label>
+         </td>
+        <td>
+       
+            <input type="text" name="zipcode_entry" value="49512" id="id_zipcode_entry" maxlength="7" />
+        
+        <input type="submit" name="_set_zipcode" value="Set Postal Code" >
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+        
+        <label for="select_faucet"><span class="more_info" title="Select Valve Unit to display.">Select Valve Unit:</span></label>
+         </td>
+        <td>
+        <select id="id_select_faucet2" name="select_faucet" onchange="submit()" >
+            
+                
+                    <option value='0' selected='selected'>1 - 1234</option>
+                
+            
+        </select>
+        <label for="placeholder"></label>
+        <!--<input type="submit" name="_set_default" value="Set Default">-->
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+        <label for="faucet_name"><span class="more_info" title="Rename this Valve Unit.  Press &#34;Set Name&#34;. (Optional)">Valve Unit Name:</span></label>
+         </td>
+        <td>
+        <input id="faucet_name" name="faucet_name" type="text" value="faucet001" >
+        <input type="submit" name="_set_faucet_name" value="Set Name" >
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+        
+        <label for="select_zone"><span class="more_info" title="Select zone to display.">Select Zone:</label>
+         </td>
+        <td>
+        <select id="id_select_zone" name="select_zone" onchange="submit()" >
+            
+                
+                    <option value='0' selected='selected'>1</option>
+                
+            
+                
+                    <option value='1'>2</option>
+                
+            
+                
+                    <option value='2'>3</option>
+                
+            
+                
+                    <option value='3'>4</option>
+                
+            
+        </select>
+        <!--<input type="submit" name="_set_editing_mode" value="Set Mode">-->
+        <br/>
+        <br/>
+        </td>
+    </tr>
+    <tr>
+    	<td class="COL-1">
+        <label for="zone_name"><span class="more_info" title="Rename this Zone.  Press &#34;Set Name.&#34; (Optional)">Zone Name:</span></label>
+         </td>
+        <td>
+        <input id="zone_name" name="zone_name" type="text" value="" />
+        <input type="submit" name="_set_zone_name" value="Set Name" >
+        <br/>
+        <br/>
+        </td>
+    </tr>
+</table>
+	<div align="center"><br/>
+        <!-- Display any status messages provided by previous operations -->
+        
+
+        <label for="placeholder"></label>
+        
+
+            <input type="submit" name="_complete_setup" value="Complete Setup">
+        
+        <label for="placeholder"></label>
+    </form>
+    </div>
+<!--END FORM -->
+    </div>
+<!-- End of Content -->
+</div>
+<!--Footer -->
+</div>
+<center>
+<!-- Copyright -->
+<span style="font-size:smaller; color:#ffffff;">Copyright &copy; 2016 Melnor, Inc. All Rights Reserved.</span>
+</center>
+
+<script type="text/javascript">
+var MenuBar1 = new Spry.Widget.MenuBar("MenuBar1", {imgDown:"SpryAssets/SpryMenuBarDownHover.gif", imgRight:"SpryAssets/SpryMenuBarRightHover.gif"});
+</script>
+</body>
+
+</html>

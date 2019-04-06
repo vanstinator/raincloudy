@@ -47,7 +47,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         """Test private methods from faucet.py."""
         faucet = self.rdy.controller.faucet
 
-        self.assertIsInstance(faucet.zone2._attributes[0], dict)
+        self.assertIsInstance(faucet.zone2._attributes, dict)
 
     def test_set_rain_delay(self):
         """Test faucet._set_rain_delay method."""
