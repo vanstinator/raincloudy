@@ -76,6 +76,17 @@ class TestRainCloudyFaucetZone(UnitTestBase):
                           faucet.zone1.id,
                           1000)
 
+    def test_watering_time(self):
+        """Test faucet.watering_time property"""
+        faucet = self.rdy.controller.faucet
+
+        # manual time
+        self.assertEqual(faucet.zone2.watering_time, 15)
+
+        # auto time
+        self.assertEqual(faucet.zone3.watering_time, 60)
+
+
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
         faucet = self.rdy.controller.faucet
