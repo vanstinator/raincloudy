@@ -18,22 +18,22 @@
     },
     {
       "next_water_cycle": "Off",
-      "manual_mode_on": false,
-      "manual_watering_time": 0,
-      "auto_watering_time": 0,
-      "program_mode_on": false,
+      "manual_mode_on": true,
+      "manual_watering_time": 15,
+      "auto_watering_time": 5,
+      "program_mode_on": true,
       "rain_delay_mode": 0,
-      "is_watering": false,
+      "is_watering": true,
       "zonename": 1
     },
     {
       "next_water_cycle": "Off",
-      "manual_mode_on": false,
-      "manual_watering_time": 0,
-      "auto_watering_time": 0,
-      "program_mode_on": false,
+      "manual_mode_on": true,
+      "manual_watering_time": 5,
+      "auto_watering_time": 60,
+      "program_mode_on": true,
       "rain_delay_mode": 0,
-      "is_watering": false,
+      "is_watering": true,
       "zonename": 2
     },
     {

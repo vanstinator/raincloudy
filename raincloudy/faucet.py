@@ -219,12 +219,24 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata[attr] = value
         self.submit_action(ddata)
 
+    # TODO in a future release we should break this out. artifact of old API
     @property
     def watering_time(self):
         """Return watering_time from zone."""
         # zone starts with index 0
         index = self.id - 1
-        return self._attributes['rain_delay_mode'][index]['auto_watering_time']
+        auto_watering_time =\
+            self._attributes['rain_delay_mode'][index]['auto_watering_time']
+
+        manual_watering_time =\
+            self._attributes['rain_delay_mode'][index]['manual_watering_time']
+
+        if auto_watering_time > manual_watering_time:
+            watering_time = auto_watering_time
+        else:
+            watering_time = manual_watering_time
+
+        return watering_time
 
     @watering_time.setter
     def watering_time(self, value):
