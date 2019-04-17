@@ -323,6 +323,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         return {
             'auto_watering':
                 getattr(self, "auto_watering"),
+            'manual_watering':
+                getattr(self, "manual_watering"),
             'is_watering':
                 getattr(self, "is_watering"),
             'name':
