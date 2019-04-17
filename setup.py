@@ -11,7 +11,7 @@ def readme():
 setup(
     name='raincloudy',
     packages=['raincloudy'],
-    version='0.0.8',
+    version='0.1.0',
     description='A Python library to communicate with Melnor' +
                 ' RainCloud Smart Garden Watering Irrigation Timer' +
                 ' (https://wwww.melnor.com/)',

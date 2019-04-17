@@ -26,8 +26,8 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         self.assertIsNone(setattr(zone, 'name', 'test'))
 
-        self.assertIsNone(setattr(zone, 'watering_time', 0))
-        self.assertIsNone(setattr(zone, 'watering_time', 'on'))
+        self.assertIsNone(setattr(zone, 'manual_watering', 0))
+        self.assertIsNone(setattr(zone, 'manual_watering', 'on'))
 
         self.assertIsNone(setattr(zone, 'rain_delay', 0))
         self.assertIsNone(setattr(zone, 'rain_delay', 1))

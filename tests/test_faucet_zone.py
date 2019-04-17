@@ -15,8 +15,8 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         # check zone attributes
         ZONE_ATTRS = [
             'auto_watering',
+            'manual_watering',
             'battery',
-            'droplet',
             'id',
             'is_watering',
             'name',
@@ -36,10 +36,14 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
         self.assertEquals(faucet.zone1.__repr__(), objname)
 
-        self.assertEquals(faucet.zone1.auto_watering, False)
         self.assertEquals(faucet.zone1.watering_time, 0)
         self.assertEquals(faucet.zone4.rain_delay, 4)
         self.assertEquals(faucet.zone3.current_time, CONTROLLER_TIMESTAMP)
+
+        self.assertTrue(faucet.zone2.manual_watering)
+        self.assertTrue(faucet.zone2.auto_watering)
+        self.assertFalse(faucet.zone1.manual_watering)
+        self.assertFalse(faucet.zone1.auto_watering)
 
         self.assertIsInstance(faucet.zone2.report(), dict)
 
@@ -72,7 +76,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         # verify allowed values
         self.assertRaises(ValueError,
-                          faucet.zone1._set_watering_time,
+                          faucet.zone1._set_manual_watering_time,
                           faucet.zone1.id,
                           1000)
 
@@ -85,7 +89,6 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         # auto time
         self.assertEqual(faucet.zone3.watering_time, 60)
-
 
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""

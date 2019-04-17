@@ -54,42 +54,6 @@ def serial_finder(data):
             'Could not find any valid controller or faucet')
 
 
-def find_program_status(data, zone):
-    """
-    Find on the HTML document if zoneX has the configuration
-    of the auto-schedule/program (auto_watering) enabled.
-
-    # expected result if enabled
-    #<input checked="checked" class="switch" id="id_zone2_program_toggle" \
-        name="zone2_program_toggle" onchange="submit()" type="checkbox"/>
-
-    # expected result if disabled
-    #<input class="switch" id="id_zone1_program_toggle" \
-        name="zone1_program_toggle" onchange="submit()" type="checkbox"/>
-
-    :param data: BeautifulSoup object
-    :param zone: zone name from class='switch'
-    :return: boolean if zone has program enabled
-    :rtype: boolean
-    :raises TypeError: if data is not a BeautifulSoup object
-    :raises IndexError: if object not found
-    """
-    if not isinstance(data, BeautifulSoup):
-        raise TypeError("Function requires BeautilSoup HTML element.")
-
-    try:
-        child = data.find_all('input', {'class': 'switch'})
-        zone_id = 'id_{0}_program_toggle'.format(zone)
-        for member in child:
-            if member.get('type') == 'checkbox' and \
-               member.get('id') == zone_id:
-                return bool(member.has_attr('checked'))
-        raise IndexError
-    except (AttributeError, IndexError, ValueError):
-        raise RainCloudyException(
-            'Could not find any valid controller or faucet')
-
-
 def find_controller_or_faucet_name(data, p_type):
     """
     Find on the HTML document the controller name.
