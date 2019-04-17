@@ -56,11 +56,13 @@ Usage
 
     # show details from zone1
     raincloudy.controller.faucet.zone1
-    {'auto_watering': True,
-     'droplet': 'https://wifiaquatimer.com/static/images/blank.gif',
+    {
+     'auto_watering': True,
+     'manual_watering': False
      'next_cycle': 'Delayed',
      'rain_delay': 1,
-     'watering_time': 0}
+     'watering_time': 0
+     }
 
      # update attributes and show all zones
      raincloudy.controller.update()
@@ -114,7 +116,7 @@ Usage
     raincloudy.controller.faucet.zone1.auto_watering = True
 
     # run water for 15 minutes on zone3
-    raincloudy.controller.faucet.zone3.watering_time = 15
+    raincloudy.controller.faucet.zone3.manual_watering = 15
 
     # set rain delay for 2 days on zone2
     raincloudy.controller.faucet.zone2.rain_delay = 2
