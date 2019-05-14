@@ -4,8 +4,7 @@ from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES)
 from raincloudy.helpers import (
-    find_controller_or_faucet_name,
-    find_program_status, find_zone_name)
+    find_controller_or_faucet_name, find_zone_name)
 
 
 class RainCloudyFaucetCore(object):
@@ -199,7 +198,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         """Set a new zone name to faucet."""
         self._set_zone_name(self.id, value)
 
-    def _set_watering_time(self, zoneid, value):
+    def _set_manual_watering_time(self, zoneid, value):
         """Private method to set watering_time per zone."""
         if value not in MANUAL_WATERING_ALLOWED:
             raise ValueError(
@@ -219,17 +218,12 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata[attr] = value
         self.submit_action(ddata)
 
-    # TODO in a future release we should break this out. artifact of old API
     @property
     def watering_time(self):
         """Return watering_time from zone."""
-        # zone starts with index 0
-        index = self.id - 1
-        auto_watering_time =\
-            self._attributes['rain_delay_mode'][index]['auto_watering_time']
+        auto_watering_time = self.lookup_attr('auto_watering_time')
 
-        manual_watering_time =\
-            self._attributes['rain_delay_mode'][index]['manual_watering_time']
+        manual_watering_time = self.lookup_attr('manual_watering_time')
 
         if auto_watering_time > manual_watering_time:
             watering_time = auto_watering_time
@@ -238,14 +232,15 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
         return watering_time
 
-    @watering_time.setter
-    def watering_time(self, value):
-        """Manually turn on water for X minutes."""
-        return self._set_watering_time(self.id, value)
-
     @property
-    def droplet(self):
-        return None
+    def manual_watering(self):
+        """Return zone manual_mode_on"""
+        return self.lookup_attr('manual_mode_on')
+
+    @manual_watering.setter
+    def manual_watering(self, value):
+        """Manually turn on water for X minutes."""
+        return self._set_manual_watering_time(self.id, value)
 
     def _set_rain_delay(self, zoneid, value):
         """Generic method to set auto_watering program."""
@@ -274,8 +269,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def rain_delay(self):
         """Return the rain delay day from zone."""
-        index = self.id - 1
-        return self._attributes['rain_delay_mode'][index]['rain_delay_mode']
+        return self.lookup_attr('rain_delay_mode')
 
     @rain_delay.setter
     def rain_delay(self, value):
@@ -285,8 +279,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def next_cycle(self):
         """Return the time scheduled for next watering from zone."""
-        index = self.id - 1
-        return self._attributes['rain_delay_mode'][index]['next_water_cycle']
+        return self.lookup_attr('next_water_cycle')
 
     def _set_auto_watering(self, zoneid, value):
         """Private method to set auto_watering program."""
@@ -308,8 +301,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def auto_watering(self):
         """Return if zone is configured to automatic watering."""
-        value = "zone{}".format(self.id)
-        return find_program_status(self._parent.html['home'], value)
+        return self.lookup_attr('program_mode_on')
 
     @auto_watering.setter
     def auto_watering(self, value):
@@ -321,13 +313,17 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         """Return boolean if zone is watering."""
         return bool(self.watering_time > 0)
 
+    def lookup_attr(self, attr):
+        """Returns rain_delay_mode attributes by zone index"""
+        return self._attributes['rain_delay_mode'][int(self.id) - 1][attr]
+
     def _to_dict(self):
         """Method to build zone dict."""
         return {
             'auto_watering':
                 getattr(self, "auto_watering"),
-            'droplet':
-                getattr(self, "droplet"),
+            'manual_watering':
+                getattr(self, "manual_watering"),
             'is_watering':
                 getattr(self, "is_watering"),
             'name':

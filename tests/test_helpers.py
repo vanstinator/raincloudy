@@ -25,14 +25,6 @@ class TestRainCloudyHelpers(UnitTestBase):
         broken_html = generate_soup_html(load_fixture('home_broken.html'))
         self.assertRaises(RainCloudyException, serial_finder, broken_html)
 
-    def test_find_program_status(self):
-        """Test find_program_status method."""
-        from raincloudy.helpers import find_program_status
-
-        self.assertRaises(TypeError, find_program_status, None, None)
-        self.assertRaises(RainCloudyException, find_program_status,
-                          self.rdy.html['home'], None)
-
     def test_find_controller_or_faucet_name(self):
         """Test find_controller_or_faucet_name method."""
         from raincloudy.helpers import find_controller_or_faucet_name as fcfn
