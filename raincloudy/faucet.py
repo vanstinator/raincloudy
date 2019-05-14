@@ -218,7 +218,6 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata[attr] = value
         self.submit_action(ddata)
 
-    # TODO in a future release we should break this out. artifact of old API
     @property
     def watering_time(self):
         """Return watering_time from zone."""
