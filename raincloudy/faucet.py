@@ -2,7 +2,7 @@
 """RainCloud Faucet."""
 from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
-    MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES)
+    MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
 from raincloudy.helpers import (
     find_controller_or_faucet_name, find_zone_name)
 
@@ -10,7 +10,7 @@ from raincloudy.helpers import (
 class RainCloudyFaucetCore():
     """RainCloudyFaucetCore object."""
 
-    def __init__(self, parent, controller, faucet_id):
+    def __init__(self, parent, controller, faucet_id, index):
         """
         Initialize RainCloudy Controller object.
 
@@ -24,9 +24,11 @@ class RainCloudyFaucetCore():
         :rtype: RainCloudyFaucet object
         """
 
+        self._index = index
         self._parent = parent
         self._controller = controller
         self._id = faucet_id
+        self._attributes = {}
 
         # zones associated with faucet
         self.zones = []
@@ -55,11 +57,6 @@ class RainCloudyFaucetCore():
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
     @property
-    def _attributes(self):
-        """Callback to self._controller attributes."""
-        return self._controller.attributes
-
-    @property
     def serial(self):
         """Return faucet id."""
         return self.id
@@ -80,8 +77,10 @@ class RainCloudyFaucetCore():
         """Return faucet name."""
         return \
             find_controller_or_faucet_name(
-                self._parent.html['home'],
-                'faucet')
+                self._controller.home,
+                'faucet',
+                self._index
+            )
 
     @name.setter
     def name(self, value):
@@ -107,8 +106,28 @@ class RainCloudyFaucetCore():
         return battery.strip('%')
 
     def update(self):
-        """Callback self._controller.update()."""
-        self._controller.update()
+        """Submit GET request to update information."""
+        # adjust headers
+        headers = HEADERS.copy()
+        headers['Accept'] = '*/*'
+        headers['X-Requested-With'] = 'XMLHttpRequest'
+        headers['X-CSRFToken'] = self._parent.csrftoken
+
+        args = '?controller_serial=' + self._controller.serial \
+               + '&faucet_serial=' + self.id
+
+        req = self._parent.client.get(STATUS_ENDPOINT + args,
+                                      headers=headers)
+
+        # token probably expired, then try again
+        if req.status_code == 403:
+            self._parent.login()
+            self.update()
+        elif req.status_code == 200:
+            self._parent.attributes = req.json()
+            self._attributes = self._parent.attributes
+        else:
+            req.raise_for_status()
 
     def _find_zone_by_id(self, zone_id):
         """Return zone by id."""
@@ -191,7 +210,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def name(self):
         """Return zone name."""
-        return find_zone_name(self._parent.html['home'], self.id)
+        return find_zone_name(self._controller.home, self.id)
 
     @name.setter
     def name(self, value):

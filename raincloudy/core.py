@@ -4,7 +4,8 @@ import requests
 import urllib3
 from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT)
-from raincloudy.helpers import generate_soup_html, serial_finder
+from raincloudy.helpers import generate_soup_html, faucet_serial_finder, \
+    controller_serial_finder
 from raincloudy.controller import RainCloudyController
 
 
@@ -39,10 +40,10 @@ class RainCloudy():
         self._password = password
 
         # initialize future attributes
-        self.controllers = []
+        self._controllers = []
         self.client = None
         self.is_connected = False
-        self.html = {
+        self._html = {
             'home': None,
             'setup': None,
             'program': None,
@@ -93,18 +94,31 @@ class RainCloudy():
 
         setup = self.client.get(SETUP_ENDPOINT, headers=HEADERS)
         # populate device list
-        self.html['setup'] = generate_soup_html(setup.text)
+        self._html['setup'] = generate_soup_html(setup.text)
 
-        # currently only one faucet is supported on the code
-        # we have future plans to support it
-        parsed_controller = serial_finder(self.html['setup'])
-        self.controllers.append(
-            RainCloudyController(
-                self,
-                parsed_controller['controller_serial'],
-                parsed_controller['faucet_serial']
+        controller_serials = controller_serial_finder(self._html['setup'])
+
+        for index, controller_serial in enumerate(controller_serials):
+
+            # We need to do a form submit for other controllers to get
+            # faucet serials
+            if index > 0:
+                data = {
+                    'select_controller': index
+                }
+                self._html['setup'] = generate_soup_html(self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text)
+
+            # TODO We need to make sure we can still dynamically update the 
+            #  root html for device names probably 
+            faucet_serials = faucet_serial_finder(self._html['setup'])
+            self._controllers.append(
+                RainCloudyController(
+                    self,
+                    controller_serial,
+                    index,
+                    faucet_serials
+                )
             )
-        )
         self.is_connected = True
         return True
 
@@ -117,17 +131,31 @@ class RainCloudy():
 
     def update(self):
         """Update controller._attributes."""
-        self.controller.update()
+        for controller in self._controllers:
+            controller.update()
 
     @property
-    def controller(self):
+    def controllers(self):
         """Show current linked controllers."""
-        if hasattr(self, 'controllers'):
-            if len(self.controllers) > 1:
-                # in the future, we should support more controllers
-                raise TypeError("Only one controller per account.")
-            return self.controllers[0]
+        if hasattr(self, '_controllers'):
+            return self._controllers
         raise AttributeError("There is no controller assigned.")
+
+    def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
+        """Method to update some attributes on namespace."""
+        headers = HEADERS.copy()
+        if referer is None:
+            headers.pop('Referer')
+        else:
+            headers['Referer'] = referer
+
+        # append csrftoken
+        if 'csrfmiddlewaretoken' not in ddata.keys():
+            ddata['csrfmiddlewaretoken'] = self.csrftoken
+
+        req = self.client.post(url, headers=headers, data=ddata)
+        if req.status_code == 200:
+            return req
 
     def logout(self):
         """Logout."""
@@ -137,7 +165,7 @@ class RainCloudy():
     def _cleanup(self):
         """Cleanup object when logging out."""
         self.client = None
-        self.controllers = []
+        self._controllers = []
         self.is_connected = False
 
 # vim:sw=4:ts=4:et:

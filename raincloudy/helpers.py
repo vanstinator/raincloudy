@@ -13,18 +13,18 @@ def generate_soup_html(data):
             'Invalid data passed to BeautifulSoup')
 
 
-def serial_finder(data):
+def faucet_serial_finder(data):
     """
-    Find controller serial and faucet_serial from the setup page.
+    Find faucet_serial from the setup page.
 
     <select id="id_select_controller2" name="select_controller" >
         <option value='0' selected='selected'>1 - Controller001</option>
+        <option value='1>2 - Controller002</option>
     </select>
 
     :param data: text to be parsed
     :type data: BeautilSoup object
-    :return: a dict with controller_serial and faucet_serial
-    :rtype: dict
+    :return: a dict with array of controller_serials and array of faucet_serials
     :raises IndexError: if controller_serial was not found on the data
     """
     if not isinstance(data, BeautifulSoup):
@@ -32,30 +32,51 @@ def serial_finder(data):
 
     try:
 
-        # The setup page contains a select box for each controller and each
-        # faucet
-        controllers_element = data.find_all('select',
-                                            {'id': 'id_select_controller2'})
+        faucets_element = data.find(id="id_select_faucet2").find_all('option')
 
-        faucets_element = data.find_all('select',
-                                        {'id': 'id_select_faucet2'})
+        faucet_serials = []
+        for faucet_element in faucets_element:
+            faucet_serials.append(faucet_element.text.split('-')[1].strip())
 
-        controller_serial = controllers_element[0].text.split('-')[1].strip()
-        faucet_serial = faucets_element[0].text.split('-')[1].strip()
-
-        # currently only one faucet is supported on the code
-        # we have plans to support it in the future
-        parsed_dict = {}
-        parsed_dict['controller_serial'] = controller_serial
-        parsed_dict['faucet_serial'] = [faucet_serial]
-        return parsed_dict
+        return faucet_serials
 
     except (AttributeError, IndexError, ValueError):
         raise RainCloudyException(
             'Could not find any valid controller or faucet')
 
 
-def find_controller_or_faucet_name(data, p_type):
+def controller_serial_finder(data):
+    """
+    Find all controller serials from the setup page.
+
+    <select id="id_select_controller2" name="select_controller" >
+        <option value='0' selected='selected'>1 - Controller001</option>
+    </select>
+
+    :param data: text to be parsed
+    :type data: BeautilSoup object
+    :return: an array of controller serials
+    :raises IndexError: if controller_serial was not found on the data
+    """
+
+    try:
+
+        controllers_element = data.find(id="id_select_controller2").find_all('option')
+
+        controller_serials = []
+
+        for controller_element in controllers_element:
+            controller_serials.append(
+                controller_element.text.split('-')[1].strip())
+
+        return controller_serials
+
+    except (AttributeError, IndexError, ValueError):
+        raise RainCloudyException(
+            'Could not find any valid controller serials')
+
+
+def find_controller_or_faucet_name(data, p_type, index=0):
     """
     Find on the HTML document the controller name.
 
@@ -67,6 +88,7 @@ def find_controller_or_faucet_name(data, p_type):
        name="select_controller" onchange="submit()" >
           <option value="0" selected="selected">HERE_IS_CONTROLLER_NAME
 
+    :param index: The index of the element we're parsing
     :param data: BeautifulSoup object
     :param p_type: parameter type. (controller or faucet)
     :return: controller or valve name
@@ -82,10 +104,17 @@ def find_controller_or_faucet_name(data, p_type):
 
     try:
         search_field = 'id_select_{0}'.format(p_type)
-        child = data.find('select', {'id': search_field})
-        return child.get_text().strip()
+        child = data.find(id=search_field).findAll('option')
+
+        # This is weird because the html doesn't have closing tags on the
+        # `options` element. This causes the first element in the list to
+        # carry the text of the second element. So we split by newline and
+        # clean it up by hand
+        parsed_text = child[index].text.strip().rsplit('\n')
+
+        return parsed_text[0]
     except AttributeError:
-        return None
+        return ''
 
 
 def find_zone_name(data, zone_id):
@@ -96,8 +125,8 @@ def find_zone_name(data, zone_id):
     <span class="more_info" \
         title="Zone can be renamed on Setup tab">1 - zone1</span>,
 
+    :param zone_id:
     :param data: BeautifulSoup object
-    :param zone: zone id
     :return: zone name
     :rtype: string
     :raises TypeError: if data is not a BeautifulSoup object
@@ -111,8 +140,11 @@ def find_zone_name(data, zone_id):
     rows = table_body.find_all('span', {'class': 'more_info'})
     for row in rows:
         if row.get_text().startswith(str(zone_id)):
-            return row.get_text()[4:].strip()
+            zone_name = row.get_text()[4:].strip()
+            if zone_name != '':
+                return row.get_text()[4:].strip()
+            else:
+                return 'Zone {0}'.format(zone_id)
     return None
-
 
 # vim:sw=4:ts=4:et:

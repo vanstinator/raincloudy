@@ -4,15 +4,15 @@
 import raincloudy
 from raincloudy.faucet import RainCloudyFaucet
 from raincloudy.const import (
-    STATUS_ENDPOINT, HEADERS, HOME_ENDPOINT, SETUP_ENDPOINT)
+    STATUS_ENDPOINT, HEADERS, SETUP_ENDPOINT, HOME_ENDPOINT)
 from raincloudy.helpers import (
-    generate_soup_html, find_controller_or_faucet_name)
+    find_controller_or_faucet_name, generate_soup_html)
 
 
 class RainCloudyController():
     """RainCloudy Controller object."""
 
-    def __init__(self, parent, controller_id, faucets=None):
+    def __init__(self, parent, controller_id, index, faucets=None):
         """
         Initialize RainCloudy Controller object.
 
@@ -26,13 +26,15 @@ class RainCloudyController():
         :rtype: RainCloudyController object
         """
         self.attributes = None
+        self.home = None
         self._parent = parent
         self._controller_id = controller_id
+        self._index = index
 
         self._verify_parent()
 
         # faucets associated with controller
-        self.faucets = []
+        self._faucets = []
 
         # load assigned faucets
         self._assign_faucets(faucets)
@@ -46,13 +48,13 @@ class RainCloudyController():
             raise TypeError("Invalid parent object.")
 
     def _assign_faucets(self, faucets):
-        """Assign RainCloudyFaucet objects to self.faucets."""
+        """Assign RainCloudyFaucet objects to self._faucets."""
         if not faucets:
             raise TypeError("Controller does not have a faucet assigned.")
 
-        for faucet_id in faucets:
-            self.faucets.append(
-                RainCloudyFaucet(self._parent, self, faucet_id))
+        for index, faucet_id in enumerate(faucets):
+            self._faucets.append(
+                RainCloudyFaucet(self._parent, self, faucet_id, index))
 
     def __repr__(self):
         """Object representation."""
@@ -61,70 +63,41 @@ class RainCloudyController():
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
-    def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
-        """Method to update some attributes on namespace."""
-        headers = HEADERS.copy()
-        if referer is None:
-            headers.pop('Referer')
-        else:
-            headers['Referer'] = referer
-
-        # append csrftoken
-        if 'csrfmiddlewaretoken' not in ddata.keys():
-            ddata['csrfmiddlewaretoken'] = self._parent.csrftoken
-
-        req = self._parent.client.post(url, headers=headers, data=ddata)
-        if req.status_code == 200:
-            self.update()
-
-    def _get_cu_and_fu_status(self):
-        """Submit GET request to update information."""
-        # adjust headers
-        headers = HEADERS.copy()
-        headers['Accept'] = '*/*'
-        headers['X-Requested-With'] = 'XMLHttpRequest'
-        headers['X-CSRFToken'] = self._parent.csrftoken
-
-        args = '?controller_serial=' + self.serial \
-               + '&faucet_serial=' + self.faucet.serial
-
-        req = self._parent.client.get(STATUS_ENDPOINT + args,
-                                      headers=headers)
-
-        # token probably expired, then try again
-        if req.status_code == 403:
-            self._parent.login()
-            self.update()
-        elif req.status_code == 200:
-            self.attributes = req.json()
-        else:
-            req.raise_for_status()
-
     def _refresh_html_home(self):
         """
         Function to refresh the self._parent.html['home'] object
         which provides the status if zones are scheduled to
         start automatically (program_toggle).
         """
-        req = self._parent.client.get(HOME_ENDPOINT)
+        data = {
+            'select_controller': self._index,
+            'select_faucet': 0,
+            'zone1_select_manual_mode': 'OFF',
+            'zone2_select_manual_mode': 'OFF',
+            'zone3_select_manual_mode': 'OFF',
+            'zone4_select_manual_mode': 'OFF',
+            'zone0_rain_delay_select': 'off',
+            'zone1_rain_delay_select': 'off',
+            'zone2_rain_delay_select': 'off',
+            'zone3_rain_delay_select': 'off',
+        }
+        req = self._parent.post(data, url=HOME_ENDPOINT, referer=HOME_ENDPOINT)
         if req.status_code == 403:
             self._parent.login()
             self.update()
         elif req.status_code == 200:
-            self._parent.html['home'] = generate_soup_html(req.text)
+            self.home = generate_soup_html(req.text)
         else:
             req.raise_for_status()
 
     def update(self):
         """
-        Call 2 methods to update zone attributes and html['home'] object
+        Call 1 method to update zone attributes
         """
-        # update zone attributes
-        self._get_cu_and_fu_status()
-
-        # update self._parent.html['home'] for gathering
-        # auto_watering status (program_toggle tag)
         self._refresh_html_home()
+        # update zone attributes
+        for faucet in self._faucets:
+            faucet.update()
 
     @property
     def serial(self):
@@ -141,8 +114,9 @@ class RainCloudyController():
     def name(self):
         """Return controller name."""
         return \
-            find_controller_or_faucet_name(self._parent.html['home'],
-                                           'controller')
+            find_controller_or_faucet_name(self.home,
+                                           'controller',
+                                           self._index)
 
     @name.setter
     def name(self, value):
@@ -151,7 +125,7 @@ class RainCloudyController():
             '_set_controller_name': 'Set Name',
             'controller_name': value,
         }
-        self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
+        self._parent.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
 
     @property
     def status(self):
@@ -164,13 +138,10 @@ class RainCloudyController():
         return self.attributes['current_time']
 
     @property
-    def faucet(self):
+    def faucets(self):
         """Show current linked faucet."""
-        if hasattr(self, 'faucets'):
-            if len(self.faucets) > 1:
-                # in the future, we should support more faucets
-                raise TypeError("Only one faucet per account.")
-            return self.faucets[0]
-        raise AttributeError("There is no faucet assigned.")
+        if hasattr(self, '_faucets'):
+            return self._faucets
+        raise AttributeError("There are no faucets assigned.")
 
 # vim:sw=4:ts=4:et:
