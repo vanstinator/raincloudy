@@ -22,9 +22,8 @@ def faucet_serial_finder(data):
         <option value='1>2 - Controller002</option>
     </select>
 
-    :param data: text to be parsed
-    :type data: BeautilSoup object
-    :return: a dict with array of controller_serials and array of faucet_serials
+    :param data: text to be parsed :type data: BeautilSoup object :return: a
+    dict with array of controller_serials and array of faucet_serials
     :raises IndexError: if controller_serial was not found on the data
     """
     if not isinstance(data, BeautifulSoup):

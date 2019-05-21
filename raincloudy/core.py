@@ -6,7 +6,7 @@ from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT,
     HOME_ENDPOINT)
 from raincloudy.helpers import generate_soup_html, faucet_serial_finder, \
-    controller_serial_finder, generate_soup_lxml
+    controller_serial_finder
 from raincloudy.controller import RainCloudyController
 
 
@@ -67,8 +67,9 @@ class RainCloudy():
 
     def login(self):
         """Call login."""
-        self._authenticate()
+        self._authenticate
 
+    @property
     def _authenticate(self):
         """Authenticate."""
         # to obtain csrftoken, remove Referer from headers
@@ -111,10 +112,13 @@ class RainCloudy():
                 data = {
                     'select_controller': index
                 }
-                self.html['setup'] = generate_soup_html(self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text)
+                self.html['setup'] = \
+                    generate_soup_html(self.post(data,
+                                                 url=SETUP_ENDPOINT,
+                                                 referer=SETUP_ENDPOINT).text)
 
-            # TODO We need to make sure we can still dynamically update the 
-            #  root html for device names probably 
+            # TODO We need to make sure we can still dynamically update the
+            #  root html for device names probably
             faucet_serials = faucet_serial_finder(self.html['setup'])
             self._controllers.append(
                 RainCloudyController(
