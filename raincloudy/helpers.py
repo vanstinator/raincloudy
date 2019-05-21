@@ -7,7 +7,7 @@ from raincloudy.exceptions import RainCloudyException
 def generate_soup_html(data):
     """Return an BeautifulSoup HTML parser document."""
     try:
-        return BeautifulSoup(data, 'html.parser')
+        return BeautifulSoup(data, 'html5lib')
     except:
         raise TypeError(
             'Invalid data passed to BeautifulSoup')
