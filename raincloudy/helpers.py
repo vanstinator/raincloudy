@@ -61,7 +61,8 @@ def controller_serial_finder(data):
 
     try:
 
-        controllers_element = data.find(id="id_select_controller2").find_all('option')
+        controllers_element = data.find(id="id_select_controller2").find_all(
+            'option')
 
         controller_serials = []
 
@@ -106,11 +107,7 @@ def find_controller_or_faucet_name(data, p_type, index=0):
         search_field = 'id_select_{0}'.format(p_type)
         child = data.find(id=search_field).findAll('option')
 
-        # This is weird because the html doesn't have closing tags on the
-        # `options` element. This causes the first element in the list to
-        # carry the text of the second element. So we split by newline and
-        # clean it up by hand
-        parsed_text = child[index].text.strip().rsplit('\n')
+        parsed_text = child[index].text.strip()
 
         return parsed_text[0]
     except AttributeError:
@@ -146,5 +143,31 @@ def find_zone_name(data, zone_id):
             else:
                 return 'Zone {0}'.format(zone_id)
     return None
+
+
+def find_selected_controller_or_fauct_index(data, p_type):
+    """
+    Find the currently selected controller index from the home html
+    :param p_type: parameter type. (controller or faucet)
+    :param data: BeautifulSoup object
+    :return: controller index
+    """
+
+    if not isinstance(data, BeautifulSoup):
+        raise TypeError("Function requires BeautilSoup HTML element.")
+
+    if not (p_type == 'controller' or p_type == 'faucet'):
+        raise TypeError("Function p_type must be controller or faucet")
+
+    try:
+        search_field = 'id_select_{0}'.format(p_type)
+        child = data.find(id=search_field).findAll('option')
+
+        for index, option in enumerate(child):
+            if "selected" in str(option):
+                return index
+
+    except AttributeError:
+        return ''
 
 # vim:sw=4:ts=4:et:

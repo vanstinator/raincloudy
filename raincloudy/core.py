@@ -3,9 +3,10 @@
 import requests
 import urllib3
 from raincloudy.const import (
-    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT)
+    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT,
+    HOME_ENDPOINT)
 from raincloudy.helpers import generate_soup_html, faucet_serial_finder, \
-    controller_serial_finder
+    controller_serial_finder, generate_soup_lxml
 from raincloudy.controller import RainCloudyController
 
 
@@ -43,7 +44,7 @@ class RainCloudy():
         self._controllers = []
         self.client = None
         self.is_connected = False
-        self._html = {
+        self.html = {
             'home': None,
             'setup': None,
             'program': None,
@@ -92,11 +93,15 @@ class RainCloudy():
         if req.status_code != 302:
             req.raise_for_status()
 
+        home = self.client.get(url=HOME_ENDPOINT)
+
+        self.html['home'] = generate_soup_html(home.text)
+
         setup = self.client.get(SETUP_ENDPOINT, headers=HEADERS)
         # populate device list
-        self._html['setup'] = generate_soup_html(setup.text)
+        self.html['setup'] = generate_soup_html(setup.text)
 
-        controller_serials = controller_serial_finder(self._html['setup'])
+        controller_serials = controller_serial_finder(self.html['setup'])
 
         for index, controller_serial in enumerate(controller_serials):
 
@@ -106,11 +111,11 @@ class RainCloudy():
                 data = {
                     'select_controller': index
                 }
-                self._html['setup'] = generate_soup_html(self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text)
+                self.html['setup'] = generate_soup_html(self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text)
 
             # TODO We need to make sure we can still dynamically update the 
             #  root html for device names probably 
-            faucet_serials = faucet_serial_finder(self._html['setup'])
+            faucet_serials = faucet_serial_finder(self.html['setup'])
             self._controllers.append(
                 RainCloudyController(
                     self,
@@ -124,7 +129,7 @@ class RainCloudy():
 
     @property
     def csrftoken(self):
-        '''Return current csrftoken from request session.'''
+        """Return current csrftoken from request session."""
         if self.client:
             return self.client.cookies.get('csrftoken')
         return None
@@ -140,6 +145,12 @@ class RainCloudy():
         if hasattr(self, '_controllers'):
             return self._controllers
         raise AttributeError("There is no controller assigned.")
+
+    def update_home(self, data):
+        """Update home html"""
+        if not isinstance(data, str):
+            raise TypeError("Function requires string response")
+        self.html['home'] = generate_soup_html(data)
 
     def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
         """Method to update some attributes on namespace."""

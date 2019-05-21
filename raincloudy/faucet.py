@@ -4,7 +4,8 @@ from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
 from raincloudy.helpers import (
-    find_controller_or_faucet_name, find_zone_name)
+    find_controller_or_faucet_name, find_zone_name,
+    find_selected_controller_or_fauct_index)
 
 
 class RainCloudyFaucetCore():
@@ -55,6 +56,11 @@ class RainCloudyFaucetCore():
             return "<{0}: {1}>".format(self.__class__.__name__, self.name)
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
+
+    @property
+    def attributes(self):
+        """Return faucet id."""
+        return self._attributes
 
     @property
     def serial(self):
@@ -124,8 +130,8 @@ class RainCloudyFaucetCore():
             self._parent.login()
             self.update()
         elif req.status_code == 200:
-            self._parent.attributes = req.json()
-            self._attributes = self._parent.attributes
+            self._attributes = req.json()
+            self._controller.attributes = self._attributes
         else:
             req.raise_for_status()
 
@@ -235,6 +241,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata = self.preupdate()
         attr = 'zone{}_select_manual_mode'.format(zoneid)
         ddata[attr] = value
+        print(ddata)
         self.submit_action(ddata)
 
     @property
@@ -317,6 +324,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
                 ddata[attr] = 'on'
         except KeyError:
             pass
+
         self.submit_action(ddata)
         return True
 
@@ -337,7 +345,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     def lookup_attr(self, attr):
         """Returns rain_delay_mode attributes by zone index"""
-        return self._attributes['rain_delay_mode'][int(self.id) - 1][attr]
+        return self._faucet.attributes['rain_delay_mode'][int(self.id) - 1][
+            attr]
 
     def _to_dict(self):
         """Method to build zone dict."""
@@ -368,7 +377,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
         # force update to make sure status is accurate
         if force_refresh:
-            self.update()
+            self._faucet.update()
 
         # select current controller and faucet
         ddata['select_controller'] = \
@@ -405,6 +414,30 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     def submit_action(self, ddata):
         """Post data."""
-        self._controller.post(ddata,
+
+        controller_index = self._parent.controllers.index(self._controller)
+        faucet_index = self._controller.faucets.index(self._faucet)
+
+        current_controller_index = find_selected_controller_or_fauct_index(
+            self._parent.html['home'], 'controller')
+
+        current_faucet_index = find_selected_controller_or_fauct_index(
+            self._parent.html['home'], 'faucet')
+
+        # This is an artifact of how the web-page we're impersonating works.
+        # The form submit will only apply actions to _selected_ controllers
+        # and faucets. So if the active controller and/or faucet on the page
+        # isn't the faucet we're trying to submit an action for we need to
+        # send the response twice. The first time we send it will switch us
+        # to the action
+        if current_controller_index != controller_index or \
+                current_faucet_index != faucet_index:
+            self._parent.post(ddata,
                               url=HOME_ENDPOINT,
                               referer=HOME_ENDPOINT)
+
+        response = self._parent.post(ddata,
+                                     url=HOME_ENDPOINT,
+                                     referer=HOME_ENDPOINT)
+
+        self._parent.update_home(response.text)
