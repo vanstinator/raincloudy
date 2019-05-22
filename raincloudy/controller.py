@@ -63,38 +63,10 @@ class RainCloudyController():
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
-    def _refresh_html_home(self):
-        """
-        Function to refresh the self._parent.html['home'] object
-        which provides the status if zones are scheduled to
-        start automatically (program_toggle).
-        """
-        data = {
-            'select_controller': self._index,
-            'select_faucet': 0,
-            'zone1_select_manual_mode': 'OFF',
-            'zone2_select_manual_mode': 'OFF',
-            'zone3_select_manual_mode': 'OFF',
-            'zone4_select_manual_mode': 'OFF',
-            'zone0_rain_delay_select': 'off',
-            'zone1_rain_delay_select': 'off',
-            'zone2_rain_delay_select': 'off',
-            'zone3_rain_delay_select': 'off',
-        }
-        req = self._parent.post(data, url=HOME_ENDPOINT, referer=HOME_ENDPOINT)
-        if req.status_code == 403:
-            self._parent.login()
-            self.update()
-        elif req.status_code == 200:
-            self.home = generate_soup_html(req.text)
-        else:
-            req.raise_for_status()
-
     def update(self):
         """
         Call 1 method to update zone attributes
         """
-        self._refresh_html_home()
         # update zone attributes
         for faucet in self._faucets:
             faucet.update()
