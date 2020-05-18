@@ -12,6 +12,7 @@ def generate_soup_html(data):
         raise TypeError(
             'Invalid data passed to BeautifulSoup')
 
+
 def serial_finder(data):
     """
     Find controller serial and faucet_serial from the setup page.
@@ -76,7 +77,7 @@ def find_controller_or_faucet_name(data, p_type):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    if not p_type in ('controller', 'faucet'):
+    if p_type not in ('controller', 'faucet'):
         raise TypeError("Function p_type must be controller or faucet")
 
     try:
