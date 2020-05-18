@@ -108,7 +108,7 @@ def find_controller_or_faucet_name(data, p_type, index=0):
 
         parsed_text = child[index].text.strip()
 
-        return parsed_text[0]
+        return parsed_text
     except AttributeError:
         return ''
 

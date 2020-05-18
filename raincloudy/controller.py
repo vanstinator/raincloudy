@@ -26,10 +26,10 @@ class RainCloudyController():
         :rtype: RainCloudyController object
         """
         self.attributes = None
-        self.home = None
         self._parent = parent
+        self.home = parent.html['home']
         self._controller_id = controller_id
-        self._index = index
+        self.index = index
 
         self._verify_parent()
 
@@ -86,14 +86,15 @@ class RainCloudyController():
     def name(self):
         """Return controller name."""
         return \
-            find_controller_or_faucet_name(self.home,
+            find_controller_or_faucet_name(self._parent.html['home'],
                                            'controller',
-                                           self._index)
+                                           self.index)
 
     @name.setter
     def name(self, value):
         """Set a new name to controller."""
         data = {
+            'select_controller': self.index,
             '_set_controller_name': 'Set Name',
             'controller_name': value,
         }

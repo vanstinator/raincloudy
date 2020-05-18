@@ -25,7 +25,7 @@ class RainCloudyFaucetCore():
         :rtype: RainCloudyFaucet object
         """
 
-        self._index = index
+        self.index = index
         self._parent = parent
         self._controller = controller
         self._id = faucet_id
@@ -85,7 +85,7 @@ class RainCloudyFaucetCore():
             find_controller_or_faucet_name(
                 self._controller.home,
                 'faucet',
-                self._index
+                self.index
             )
 
     @name.setter
@@ -93,10 +93,10 @@ class RainCloudyFaucetCore():
         """Set a new name to faucet."""
         data = {
             '_set_faucet_name': 'Set Name',
-            'select_faucet': 0,
+            'select_faucet': self.index,
             'faucet_name': value,
         }
-        self._controller.post(data)
+        self._parent.post(data)
 
     @property
     def status(self):
@@ -207,11 +207,13 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         # zone starts with index 0
         zoneid -= 1
         data = {
+            'select_controller': self._controller.index,
+            'select_faucet': self._faucet.index,
             '_set_zone_name': 'Set Name',
             'select_zone': str(zoneid),
             'zone_name': name,
         }
-        self._controller.post(data)
+        self._parent.post(data)
 
     @property
     def name(self):
@@ -241,7 +243,6 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata = self.preupdate()
         attr = 'zone{}_select_manual_mode'.format(zoneid)
         ddata[attr] = value
-        print(ddata)
         self.submit_action(ddata)
 
     @property
