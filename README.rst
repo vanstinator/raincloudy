@@ -17,8 +17,6 @@ RainCloudy is a library written in Python 3.x that manages the Melnor RainCloud 
 
 Melnor RainCloud official page: `http://www.melnor.com/16043-raincloud-smart-water-timer`
 
-Melnor RainCloud Youtube video: `https://goo.gl/Y5kx1X`
-
 Source code documentation: `http://raincloudy.readthedocs.io/ <http://raincloudy.readthedocs.io/>`_
 
 Usage
