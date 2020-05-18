@@ -7,8 +7,8 @@ RainCloudy
 .. image:: https://travis-ci.org/vanstinator/raincloudy.svg?branch=master
     :target: https://travis-ci.org/vanstinator/raincloudy
 
-.. image:: https://coveralls.io/repos/github/tchellomello/raincloudy/badge.svg?branch=master
-    :target: https://coveralls.io/github/tchellomello/raincloudy?branch=master
+.. image:: https://coveralls.io/repos/github/vanstinator/raincloudy/badge.svg?branch=master
+    :target: https://coveralls.io/github/vanstinator/raincloudy?branch=master
 
 
 RainCloudy is a library written in Python 3.x that manages the Melnor RainCloud Smart Garden Watering Irrigation Timer.
