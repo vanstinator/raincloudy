@@ -4,8 +4,8 @@ RainCloudy
 .. image:: https://badge.fury.io/py/raincloudy.svg
     :target: https://badge.fury.io/py/raincloudy
 
-.. image:: https://travis-ci.org/tchellomello/raincloudy.svg?branch=master
-    :target: https://travis-ci.org/tchellomello/raincloudy
+.. image:: https://travis-ci.org/vanstinator/raincloudy.svg?branch=master
+    :target: https://travis-ci.org/vanstinator/raincloudy
 
 .. image:: https://coveralls.io/repos/github/tchellomello/raincloudy/badge.svg?branch=master
     :target: https://coveralls.io/github/tchellomello/raincloudy?branch=master
