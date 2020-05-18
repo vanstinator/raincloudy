@@ -12,9 +12,9 @@ setup(
     name='raincloudy',
     packages=['raincloudy'],
     version='0.1.0',
-    description='A Python library to communicate with Melnor' +
-                ' RainCloud Smart Garden Watering Irrigation Timer' +
-                ' (https://wwww.melnor.com/)',
+    description='A Python library to communicate with Melnor \
+                 RainCloud Smart Garden Watering Irrigation Timer \
+                 (https://wwww.melnor.com/)',
     long_description=readme(),
     author='Marcelo Moreira de Mello',
     author_email='tchello.mello@gmail.com',

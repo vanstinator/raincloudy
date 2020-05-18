@@ -8,7 +8,7 @@ from raincloudy.helpers import generate_soup_html, serial_finder
 from raincloudy.controller import RainCloudyController
 
 
-class RainCloudy(object):
+class RainCloudy():
     """RainCloudy object."""
 
     def __init__(self, username, password, http_proxy=None, https_proxy=None,

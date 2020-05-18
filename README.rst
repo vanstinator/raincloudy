@@ -11,13 +11,11 @@ RainCloudy
     :target: https://coveralls.io/github/tchellomello/raincloudy?branch=master
 
 
-RainCloudy is a library written in Python 2.7/3.x that manages the Melnor RainCloud Smart Garden Watering Irrigation Timer.
+RainCloudy is a library written in Python 3.x that manages the Melnor RainCloud Smart Garden Watering Irrigation Timer.
 
 *Currently Melnor WifiAquaTimer not provide an official API. The results of this project are merely from reverse engineering. This project does not have any official relationship or support by Melnor.com. Use it at your own risk.*
 
 Melnor RainCloud official page: `http://www.melnor.com/16043-raincloud-smart-water-timer`
-
-Melnor RainCloud Youtube video: `https://goo.gl/Y5kx1X`
 
 Source code documentation: `http://raincloudy.readthedocs.io/ <http://raincloudy.readthedocs.io/>`_
 
