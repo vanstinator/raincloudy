@@ -7,7 +7,7 @@ from raincloudy.helpers import (
     find_controller_or_faucet_name, find_zone_name)
 
 
-class RainCloudyFaucetCore(object):
+class RainCloudyFaucetCore():
     """RainCloudyFaucetCore object."""
 
     def __init__(self, parent, controller, faucet_id):
@@ -249,7 +249,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
         if isinstance(value, int):
             if value > MAX_RAIN_DELAY_DAYS or value < 0:
-                return None
+                value = None
             elif value == 0:
                 value = 'off'
             elif value == 1:
@@ -258,7 +258,10 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
                 value = str(value) + 'days'
         elif isinstance(value, str):
             if value.lower() != 'off':
-                return None
+                value = None
+
+        if value is None:
+            return None
 
         ddata = self.preupdate()
         attr = 'zone{}_rain_delay_select'.format(zoneid)

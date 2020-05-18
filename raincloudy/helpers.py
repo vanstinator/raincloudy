@@ -9,8 +9,8 @@ def generate_soup_html(data):
     try:
         return BeautifulSoup(data, 'html.parser')
     except:
-        raise
-
+        raise TypeError(
+            'Invalid data passed to BeautifulSoup')
 
 def serial_finder(data):
     """
@@ -33,20 +33,20 @@ def serial_finder(data):
 
         # The setup page contains a select box for each controller and each
         # faucet
-        controllersElement = data.find_all('select',
-                                           {'id': 'id_select_controller2'})
+        controllers_element = data.find_all('select',
+                                            {'id': 'id_select_controller2'})
 
-        faucetsElement = data.find_all('select',
-                                       {'id': 'id_select_faucet2'})
+        faucets_element = data.find_all('select',
+                                        {'id': 'id_select_faucet2'})
 
-        controllerSerial = controllersElement[0].text.split('-')[1].strip()
-        faucetSerial = faucetsElement[0].text.split('-')[1].strip()
+        controller_serial = controllers_element[0].text.split('-')[1].strip()
+        faucet_serial = faucets_element[0].text.split('-')[1].strip()
 
         # currently only one faucet is supported on the code
         # we have plans to support it in the future
         parsed_dict = {}
-        parsed_dict['controller_serial'] = controllerSerial
-        parsed_dict['faucet_serial'] = [faucetSerial]
+        parsed_dict['controller_serial'] = controller_serial
+        parsed_dict['faucet_serial'] = [faucet_serial]
         return parsed_dict
 
     except (AttributeError, IndexError, ValueError):
@@ -76,7 +76,7 @@ def find_controller_or_faucet_name(data, p_type):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    if not (p_type == 'controller' or p_type == 'faucet'):
+    if not p_type in ('controller', 'faucet'):
         raise TypeError("Function p_type must be controller or faucet")
 
     try:

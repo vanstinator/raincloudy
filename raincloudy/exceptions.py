@@ -4,4 +4,3 @@
 
 class RainCloudyException(Exception):
     """RainCloudy base exceptions."""
-    pass

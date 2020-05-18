@@ -9,7 +9,7 @@ from raincloudy.helpers import (
     generate_soup_html, find_controller_or_faucet_name)
 
 
-class RainCloudyController(object):
+class RainCloudyController():
     """RainCloudy Controller object."""
 
     def __init__(self, parent, controller_id, faucets=None):
