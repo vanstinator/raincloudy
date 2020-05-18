@@ -21,7 +21,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         mock.post(HOME_ENDPOINT,
                   text=load_fixture('home.html'))
 
-        zone = self.rdy.controller.faucet.zone1
+        zone = self.rdy.controllers[0].faucets[0].zone1
         zone.update()
 
         self.assertIsNone(setattr(zone, 'name', 'test'))

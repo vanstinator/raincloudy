@@ -9,7 +9,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_attributes(self):
         """Test zone.attributes."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
         zones = faucet.zones
 
         # check zone attributes
@@ -49,13 +49,13 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_private_methods(self):
         """Test private methods from faucet.py."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         self.assertIsInstance(faucet.zone2._attributes, dict)
 
     def test_set_rain_delay(self):
         """Test faucet._set_rain_delay method."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         # test if a non-valid parameter is passed
         for zone in faucet.zones:
@@ -64,7 +64,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_set_auto_watering(self):
         """Test faucet._set_auto_watering method."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         # test if a non-valid parameter is passed
         for zone in faucet.zones:
@@ -72,7 +72,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_set_watering_time(self):
         """Test faucet._set_watering_time method."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         # verify allowed values
         self.assertRaises(ValueError,
@@ -82,7 +82,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_watering_time(self):
         """Test faucet.watering_time property"""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         # manual time
         self.assertEqual(faucet.zone2.watering_time, 15)
@@ -92,7 +92,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         faucet._parent = None
         objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')

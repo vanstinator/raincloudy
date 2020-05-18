@@ -20,7 +20,7 @@ class TestRainCloudyFaucet(UnitTestBase):
         mock.post(SETUP_ENDPOINT)
         mock.get(SETUP_ENDPOINT)
 
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
         self.assertIsNone(setattr(faucet, 'name', 'test'))
         faucet.update()
 

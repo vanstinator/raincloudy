@@ -110,7 +110,7 @@ def find_controller_or_faucet_name(data, p_type, index=0):
 
         return parsed_text
     except AttributeError:
-        return ''
+        return None
 
 
 def find_zone_name(data, zone_id):

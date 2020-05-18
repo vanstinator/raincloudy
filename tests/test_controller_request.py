@@ -20,7 +20,7 @@ class TestRainCloudyController(UnitTestBase):
         mock.post(SETUP_ENDPOINT)
         mock.get(SETUP_ENDPOINT)
 
-        controller = self.rdy.controller
+        controller = self.rdy.controllers[0]
         controller.update()
         self.assertIsNone(setattr(controller, 'name', 'test'))
 
