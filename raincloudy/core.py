@@ -62,12 +62,13 @@ class RainCloudy():
 
     def __repr__(self):
         """Object representation."""
-        return "<{0}: {1}>".format(self.__class__.__name__,
-                                   self.controller.serial)
+        for controller in self.controllers:
+            return "<{0}: {1}>".format(self.__class__.__name__,
+                                       controller.serial)
 
     def login(self):
         """Call login."""
-        self._authenticate
+        return self._authenticate
 
     @property
     def _authenticate(self):
@@ -117,8 +118,6 @@ class RainCloudy():
                                                  url=SETUP_ENDPOINT,
                                                  referer=SETUP_ENDPOINT).text)
 
-            # TODO We need to make sure we can still dynamically update the
-            #  root html for device names probably
             faucet_serials = faucet_serial_finder(self.html['setup'])
             self._controllers.append(
                 RainCloudyController(
@@ -169,8 +168,10 @@ class RainCloudy():
             ddata['csrfmiddlewaretoken'] = self.csrftoken
 
         req = self.client.post(url, headers=headers, data=ddata)
-        if req.status_code == 200:
-            return req
+        if not req.status_code == 200:
+            return None
+
+        return req
 
     def logout(self):
         """Logout."""

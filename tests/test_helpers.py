@@ -23,7 +23,8 @@ class TestRainCloudyHelpers(UnitTestBase):
         self.assertRaises(TypeError, faucet_serial_finder, None)
 
         broken_html = generate_soup_html(load_fixture('home_broken.html'))
-        self.assertRaises(RainCloudyException, faucet_serial_finder, broken_html)
+        self.assertRaises(RainCloudyException,
+                          faucet_serial_finder, broken_html)
 
     def test_find_controller_or_faucet_name(self):
         """Test find_controller_or_faucet_name method."""

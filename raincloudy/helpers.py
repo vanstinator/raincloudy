@@ -139,12 +139,12 @@ def find_zone_name(data, zone_id):
             zone_name = row.get_text()[4:].strip()
             if zone_name != '':
                 return row.get_text()[4:].strip()
-            else:
-                return 'Zone {0}'.format(zone_id)
+
+            return 'Zone {0}'.format(zone_id)
     return None
 
 
-def find_selected_controller_or_fauct_index(data, p_type):
+def find_selected_controller_or_faucet_index(data, p_type):
     """
     Find the currently selected controller index from the home html
     :param p_type: parameter type. (controller or faucet)
@@ -152,10 +152,11 @@ def find_selected_controller_or_fauct_index(data, p_type):
     :return: controller index
     """
 
+    entity_index = None
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    if not (p_type == 'controller' or p_type == 'faucet'):
+    if p_type not in ('controller', 'faucet'):
         raise TypeError("Function p_type must be controller or faucet")
 
     try:
@@ -164,9 +165,10 @@ def find_selected_controller_or_fauct_index(data, p_type):
 
         for index, option in enumerate(child):
             if "selected" in str(option):
-                return index
+                entity_index = index
 
     except AttributeError:
-        return ''
+        pass
 
+    return entity_index
 # vim:sw=4:ts=4:et:

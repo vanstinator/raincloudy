@@ -5,7 +5,7 @@ from raincloudy.const import (
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
 from raincloudy.helpers import (
     find_controller_or_faucet_name, find_zone_name,
-    find_selected_controller_or_fauct_index)
+    find_selected_controller_or_faucet_index)
 
 
 class RainCloudyFaucetCore():
@@ -419,10 +419,10 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         controller_index = self._parent.controllers.index(self._controller)
         faucet_index = self._controller.faucets.index(self._faucet)
 
-        current_controller_index = find_selected_controller_or_fauct_index(
+        current_controller_index = find_selected_controller_or_faucet_index(
             self._parent.html['home'], 'controller')
 
-        current_faucet_index = find_selected_controller_or_fauct_index(
+        current_faucet_index = find_selected_controller_or_faucet_index(
             self._parent.html['home'], 'faucet')
 
         # This is an artifact of how the web-page we're impersonating works.

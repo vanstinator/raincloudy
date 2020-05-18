@@ -3,10 +3,8 @@
 
 import raincloudy
 from raincloudy.faucet import RainCloudyFaucet
-from raincloudy.const import (
-    STATUS_ENDPOINT, HEADERS, SETUP_ENDPOINT, HOME_ENDPOINT)
-from raincloudy.helpers import (
-    find_controller_or_faucet_name, generate_soup_html)
+from raincloudy.const import SETUP_ENDPOINT
+from raincloudy.helpers import find_controller_or_faucet_name
 
 
 class RainCloudyController():
@@ -25,7 +23,7 @@ class RainCloudyController():
         :return: RainCloudyController object
         :rtype: RainCloudyController object
         """
-        self.attributes = None
+        self.attributes = {}
         self._parent = parent
         self.home = parent.html['home']
         self._controller_id = controller_id
