@@ -372,6 +372,10 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         """Return status from zone."""
         return self._to_dict()
 
+    def update(self):
+        """Request faucet to update"""
+        return self._faucet.update()
+
     def preupdate(self, force_refresh=True):
         """Return a dict with all current options prior submitting request."""
         ddata = MANUAL_OP_DATA.copy()

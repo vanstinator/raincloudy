@@ -49,7 +49,7 @@ class TestRainCloudyFaucet(UnitTestBase):
         faucet = self.rdy.controllers[0].faucets[0]
 
         # if name attribute fails, displays id
-        faucet._parent = None
+        faucet._controller = None
         objname = "<RainCloudyFaucet: {}>".format(FAUCET_SERIAL)
         self.assertEquals(faucet.__repr__(), objname)
 

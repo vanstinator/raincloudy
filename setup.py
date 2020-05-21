@@ -21,7 +21,12 @@ setup(
     url='https://github.com/tchellomello/raincloudy',
     license='Apache License 2.0',
     include_package_data=True,
-    install_requires=['requests>=2.0', 'bs4', 'urllib3>=1.22', 'html5lib==1.0.1'],
+    install_requires=[
+        'requests>=2.0',
+        'bs4',
+        'urllib3>=1.22',
+        'html5lib==1.0.1'
+    ],
     test_suite='tests',
     keywords=[
         'garden',
