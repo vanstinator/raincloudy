@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """RainCloudy core object."""
+import os
+from pathlib import Path
+
 import requests
 import urllib3
+
 from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT)
 from raincloudy.helpers import generate_soup_html, serial_finder
@@ -69,6 +73,12 @@ class RainCloudy():
 
     def _authenticate(self):
         """Authenticate."""
+
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        cert_file = Path(__location__ + "/wifiaquatimer_com_chain.cer")
+
         # to obtain csrftoken, remove Referer from headers
         headers = HEADERS.copy()
         headers.pop('Referer')
@@ -76,7 +86,7 @@ class RainCloudy():
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.verify = './raincloudy/wifiaquatimer_com_chain.cer'
+        self.client.verify = cert_file.resolve()
         self.client.stream = True
         self.client.get(LOGIN_ENDPOINT, headers=headers)
 
