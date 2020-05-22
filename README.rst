@@ -121,6 +121,6 @@ Usage
 
 
 Current Limitations
-------------
+--------------------
 - Only 1 (one) controller is supported.
 - Only 1 (one) valve unit is supported.
