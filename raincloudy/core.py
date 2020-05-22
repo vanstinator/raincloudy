@@ -76,7 +76,7 @@ class RainCloudy():
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.verify = self._ssl_verify
+        self.client.verify = './raincloudy/wifiaquatimer_com_chain.cer'
         self.client.stream = True
         self.client.get(LOGIN_ENDPOINT, headers=headers)
 
