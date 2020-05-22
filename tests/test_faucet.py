@@ -10,7 +10,7 @@ class TestRainCloudyFaucet(UnitTestBase):
     def test_attributes(self):
         """Test faucet.attributes."""
         from raincloudy.faucet import RainCloudyFaucetZone
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         self.assertTrue(hasattr(faucet, 'battery'))
         self.assertTrue(hasattr(faucet, 'id'))
@@ -38,7 +38,7 @@ class TestRainCloudyFaucet(UnitTestBase):
     def test_zones(self):
         """test faucet.zones attribute."""
         from raincloudy.faucet import RainCloudyFaucetZone
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         zones = faucet.zones
         self.assertIsInstance(zones, list)
@@ -46,10 +46,10 @@ class TestRainCloudyFaucet(UnitTestBase):
 
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
-        faucet = self.rdy.controller.faucet
+        faucet = self.rdy.controllers[0].faucets[0]
 
         # if name attribute fails, displays id
-        faucet._parent = None
+        faucet._controller = None
         objname = "<RainCloudyFaucet: {}>".format(FAUCET_SERIAL)
         self.assertEquals(faucet.__repr__(), objname)
 

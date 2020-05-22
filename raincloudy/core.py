@@ -3,8 +3,10 @@
 import requests
 import urllib3
 from raincloudy.const import (
-    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT)
-from raincloudy.helpers import generate_soup_html, serial_finder
+    INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT,
+    HOME_ENDPOINT)
+from raincloudy.helpers import generate_soup_html, faucet_serial_finder, \
+    controller_serial_finder
 from raincloudy.controller import RainCloudyController
 
 
@@ -39,7 +41,7 @@ class RainCloudy():
         self._password = password
 
         # initialize future attributes
-        self.controllers = []
+        self._controllers = []
         self.client = None
         self.is_connected = False
         self.html = {
@@ -60,13 +62,15 @@ class RainCloudy():
 
     def __repr__(self):
         """Object representation."""
-        return "<{0}: {1}>".format(self.__class__.__name__,
-                                   self.controller.serial)
+        for controller in self.controllers:
+            return "<{0}: {1}>".format(self.__class__.__name__,
+                                       controller.serial)
 
     def login(self):
         """Call login."""
-        self._authenticate()
+        return self._authenticate
 
+    @property
     def _authenticate(self):
         """Authenticate."""
         # to obtain csrftoken, remove Referer from headers
@@ -91,43 +95,83 @@ class RainCloudy():
         if req.status_code != 302:
             req.raise_for_status()
 
+        home = self.client.get(url=HOME_ENDPOINT)
+
+        self.html['home'] = generate_soup_html(home.text)
+
         setup = self.client.get(SETUP_ENDPOINT, headers=HEADERS)
         # populate device list
         self.html['setup'] = generate_soup_html(setup.text)
 
-        # currently only one faucet is supported on the code
-        # we have future plans to support it
-        parsed_controller = serial_finder(self.html['setup'])
-        self.controllers.append(
-            RainCloudyController(
-                self,
-                parsed_controller['controller_serial'],
-                parsed_controller['faucet_serial']
+        controller_serials = controller_serial_finder(self.html['setup'])
+
+        for index, controller_serial in enumerate(controller_serials):
+
+            # We need to do a form submit for other controllers to get
+            # faucet serials
+            if index > 0:
+                data = {
+                    'select_controller': index
+                }
+                self.html['setup'] = \
+                    generate_soup_html(self.post(data,
+                                                 url=SETUP_ENDPOINT,
+                                                 referer=SETUP_ENDPOINT).text)
+
+            faucet_serials = faucet_serial_finder(self.html['setup'])
+            self._controllers.append(
+                RainCloudyController(
+                    self,
+                    controller_serial,
+                    index,
+                    faucet_serials
+                )
             )
-        )
         self.is_connected = True
         return True
 
     @property
     def csrftoken(self):
-        '''Return current csrftoken from request session.'''
+        """Return current csrftoken from request session."""
         if self.client:
             return self.client.cookies.get('csrftoken')
         return None
 
     def update(self):
         """Update controller._attributes."""
-        self.controller.update()
+        for controller in self._controllers:
+            controller.update()
 
     @property
-    def controller(self):
+    def controllers(self):
         """Show current linked controllers."""
-        if hasattr(self, 'controllers'):
-            if len(self.controllers) > 1:
-                # in the future, we should support more controllers
-                raise TypeError("Only one controller per account.")
-            return self.controllers[0]
+        if hasattr(self, '_controllers'):
+            return self._controllers
         raise AttributeError("There is no controller assigned.")
+
+    def update_home(self, data):
+        """Update home html"""
+        if not isinstance(data, str):
+            raise TypeError("Function requires string response")
+        self.html['home'] = generate_soup_html(data)
+
+    def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
+        """Method to update some attributes on namespace."""
+        headers = HEADERS.copy()
+        if referer is None:
+            headers.pop('Referer')
+        else:
+            headers['Referer'] = referer
+
+        # append csrftoken
+        if 'csrfmiddlewaretoken' not in ddata.keys():
+            ddata['csrfmiddlewaretoken'] = self.csrftoken
+
+        req = self.client.post(url, headers=headers, data=ddata)
+        if not req.status_code == 200:
+            return None
+
+        return req
 
     def logout(self):
         """Logout."""
@@ -137,7 +181,7 @@ class RainCloudy():
     def _cleanup(self):
         """Cleanup object when logging out."""
         self.client = None
-        self.controllers = []
+        self._controllers = []
         self.is_connected = False
 
 # vim:sw=4:ts=4:et:

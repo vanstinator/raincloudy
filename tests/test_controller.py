@@ -11,7 +11,7 @@ class TestRainCloudyController(UnitTestBase):
     def test_errors_or_exceptions(self):
         """Tests for errors or exceptions."""
         from raincloudy.controller import RainCloudyController
-        controller = self.rdy.controller
+        controller = self.rdy.controllers[0]
 
         # make sure _parent is a RainCloudy.core object
         self.assertRaises(TypeError, RainCloudyController, None, None)
@@ -25,24 +25,14 @@ class TestRainCloudyController(UnitTestBase):
         self.assertRaises(TypeError, RainCloudyController,
                           self.rdy, CONTROLLER_SERIAL)
 
-        # check if has more than 1 faucet
-        controller.faucets.append(1)
-        self.assertRaises(TypeError, getattr, controller, 'faucet')
-
-        # check if faucets does not exist
-        delattr(controller, 'faucets')
-        self.assertRaises(AttributeError, getattr, controller, 'faucet')
-
     def test_attributes(self):
         """Test controller attributes."""
-        controller = self.rdy.controller
+        controller = self.rdy.controllers[0]
 
         self.assertTrue(hasattr(controller, 'current_time'))
-        self.assertTrue(hasattr(controller, 'faucet'))
         self.assertTrue(hasattr(controller, 'faucets'))
         self.assertTrue(hasattr(controller, 'id'))
         self.assertTrue(hasattr(controller, 'name'))
-        self.assertTrue(hasattr(controller, 'post'))
         self.assertTrue(hasattr(controller, 'serial'))
         self.assertTrue(hasattr(controller, 'status'))
         self.assertTrue(hasattr(controller, 'update'))

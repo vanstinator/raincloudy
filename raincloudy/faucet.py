@@ -2,15 +2,16 @@
 """RainCloud Faucet."""
 from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
-    MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES)
+    MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
 from raincloudy.helpers import (
-    find_controller_or_faucet_name, find_zone_name)
+    find_controller_or_faucet_name, find_zone_name,
+    find_selected_controller_or_faucet_index)
 
 
 class RainCloudyFaucetCore():
     """RainCloudyFaucetCore object."""
 
-    def __init__(self, parent, controller, faucet_id):
+    def __init__(self, parent, controller, faucet_id, index):
         """
         Initialize RainCloudy Controller object.
 
@@ -24,9 +25,11 @@ class RainCloudyFaucetCore():
         :rtype: RainCloudyFaucet object
         """
 
+        self.index = index
         self._parent = parent
         self._controller = controller
         self._id = faucet_id
+        self._attributes = {}
 
         # zones associated with faucet
         self.zones = []
@@ -55,9 +58,9 @@ class RainCloudyFaucetCore():
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
     @property
-    def _attributes(self):
-        """Callback to self._controller attributes."""
-        return self._controller.attributes
+    def attributes(self):
+        """Return faucet id."""
+        return self._attributes
 
     @property
     def serial(self):
@@ -80,18 +83,20 @@ class RainCloudyFaucetCore():
         """Return faucet name."""
         return \
             find_controller_or_faucet_name(
-                self._parent.html['home'],
-                'faucet')
+                self._controller.home,
+                'faucet',
+                self.index
+            )
 
     @name.setter
     def name(self, value):
         """Set a new name to faucet."""
         data = {
             '_set_faucet_name': 'Set Name',
-            'select_faucet': 0,
+            'select_faucet': self.index,
             'faucet_name': value,
         }
-        self._controller.post(data)
+        self._parent.post(data)
 
     @property
     def status(self):
@@ -107,8 +112,28 @@ class RainCloudyFaucetCore():
         return battery.strip('%')
 
     def update(self):
-        """Callback self._controller.update()."""
-        self._controller.update()
+        """Submit GET request to update information."""
+        # adjust headers
+        headers = HEADERS.copy()
+        headers['Accept'] = '*/*'
+        headers['X-Requested-With'] = 'XMLHttpRequest'
+        headers['X-CSRFToken'] = self._parent.csrftoken
+
+        args = '?controller_serial=' + self._controller.serial \
+               + '&faucet_serial=' + self.id
+
+        req = self._parent.client.get(STATUS_ENDPOINT + args,
+                                      headers=headers)
+
+        # token probably expired, then try again
+        if req.status_code == 403:
+            self._parent.login()
+            self.update()
+        elif req.status_code == 200:
+            self._attributes = req.json()
+            self._controller.attributes = self._attributes
+        else:
+            req.raise_for_status()
 
     def _find_zone_by_id(self, zone_id):
         """Return zone by id."""
@@ -182,16 +207,18 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         # zone starts with index 0
         zoneid -= 1
         data = {
+            'select_controller': self._controller.index,
+            'select_faucet': self._faucet.index,
             '_set_zone_name': 'Set Name',
             'select_zone': str(zoneid),
             'zone_name': name,
         }
-        self._controller.post(data)
+        self._parent.post(data)
 
     @property
     def name(self):
         """Return zone name."""
-        return find_zone_name(self._parent.html['home'], self.id)
+        return find_zone_name(self._controller.home, self.id)
 
     @name.setter
     def name(self, value):
@@ -298,6 +325,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
                 ddata[attr] = 'on'
         except KeyError:
             pass
+
         self.submit_action(ddata)
         return True
 
@@ -318,7 +346,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     def lookup_attr(self, attr):
         """Returns rain_delay_mode attributes by zone index"""
-        return self._attributes['rain_delay_mode'][int(self.id) - 1][attr]
+        return self._faucet.attributes['rain_delay_mode'][int(self.id) - 1][
+            attr]
 
     def _to_dict(self):
         """Method to build zone dict."""
@@ -343,13 +372,17 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         """Return status from zone."""
         return self._to_dict()
 
+    def update(self):
+        """Request faucet to update"""
+        return self._faucet.update()
+
     def preupdate(self, force_refresh=True):
         """Return a dict with all current options prior submitting request."""
         ddata = MANUAL_OP_DATA.copy()
 
         # force update to make sure status is accurate
         if force_refresh:
-            self.update()
+            self._faucet.update()
 
         # select current controller and faucet
         ddata['select_controller'] = \
@@ -386,6 +419,30 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     def submit_action(self, ddata):
         """Post data."""
-        self._controller.post(ddata,
+
+        controller_index = self._parent.controllers.index(self._controller)
+        faucet_index = self._controller.faucets.index(self._faucet)
+
+        current_controller_index = find_selected_controller_or_faucet_index(
+            self._parent.html['home'], 'controller')
+
+        current_faucet_index = find_selected_controller_or_faucet_index(
+            self._parent.html['home'], 'faucet')
+
+        # This is an artifact of how the web-page we're impersonating works.
+        # The form submit will only apply actions to _selected_ controllers
+        # and faucets. So if the active controller and/or faucet on the page
+        # isn't the faucet we're trying to submit an action for we need to
+        # send the response twice. The first time we send it will switch us
+        # to the action
+        if current_controller_index != controller_index or \
+                current_faucet_index != faucet_index:
+            self._parent.post(ddata,
                               url=HOME_ENDPOINT,
                               referer=HOME_ENDPOINT)
+
+        response = self._parent.post(ddata,
+                                     url=HOME_ENDPOINT,
+                                     referer=HOME_ENDPOINT)
+
+        self._parent.update_home(response.text)
