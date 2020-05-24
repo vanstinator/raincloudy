@@ -8,7 +8,7 @@ from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT,
     HOME_ENDPOINT)
 from raincloudy.helpers import generate_soup_html, faucet_serial_finder, \
-    controller_serial_finder, find_zone_name
+    controller_serial_finder, find_zone_names
 from raincloudy.controller import RainCloudyController
 
 
@@ -128,7 +128,8 @@ class RainCloudy():
 
             faucet_serials = faucet_serial_finder(self.html['setup'])
             
-            for faucet_index, faucet_serials in enumerate(faucet_serials):
+            faucets = [];
+            for faucet_index, faucet_serial in enumerate(faucet_serials):
 
                 # We need to do a form submit for other faucets to get
                 # zone names
@@ -141,14 +142,25 @@ class RainCloudy():
                                                     url=SETUP_ENDPOINT,
                                                     referer=SETUP_ENDPOINT).text)
 
-                    # zone_names = {}find_zone_name(self.html['setup'])
+
+                # faucet_serials[faucet_index] = {
+                #    {
+                #         faucet_serial: faucet_serials[faucet_index],
+                #         faucet_zone_names: zone_names
+                #    }
+                # }
+                zone_names = find_zone_names(self.html['setup'])
+                faucets.append({
+                    'serial': faucet_serial,
+                    'zones': zone_names
+                })
 
             self._controllers.append(
                 RainCloudyController(
                     self,
                     controller_serial,
                     index,
-                    faucet_serials
+                    faucets
                 )
             )
         self.is_connected = True

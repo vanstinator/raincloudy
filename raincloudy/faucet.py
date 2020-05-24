@@ -4,14 +4,13 @@ from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
 from raincloudy.helpers import (
-    find_controller_or_faucet_name, find_zone_name,
-    find_selected_controller_or_faucet_index)
+    find_controller_or_faucet_name, find_selected_controller_or_faucet_index)
 
 
 class RainCloudyFaucetCore():
     """RainCloudyFaucetCore object."""
 
-    def __init__(self, parent, controller, faucet_id, index):
+    def __init__(self, parent, controller, faucet_id, index, zone_names=[]):
         """
         Initialize RainCloudy Controller object.
 
@@ -30,6 +29,7 @@ class RainCloudyFaucetCore():
         self._controller = controller
         self._id = faucet_id
         self._attributes = {}
+        self._zone_names = zone_names
 
         # zones associated with faucet
         self.zones = []
@@ -45,7 +45,8 @@ class RainCloudyFaucetCore():
                     parent=self._parent,
                     controller=self._controller,
                     faucet=self,
-                    zone_id=zone_id)
+                    zone_id=zone_id,
+                    zone_name=self._zone_names[zone_id - 1])
 
             if zone not in self.zones:
                 self.zones.append(zone)
@@ -175,7 +176,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     # pylint: disable=super-init-not-called
     # needs review later
-    def __init__(self, parent, controller, faucet, zone_id):
+    def __init__(self, parent, controller, faucet, zone_id, zone_name):
         """
         Initialize RainCloudy Controller object.
 
@@ -194,6 +195,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         self._controller = controller
         self._faucet = faucet
         self._id = zone_id
+        self._name = zone_name
 
     def __repr__(self):
         """Object representation."""
@@ -218,7 +220,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
     @property
     def name(self):
         """Return zone name."""
-        return find_zone_name(self._controller.home, self.id)
+        return self._name
 
     @name.setter
     def name(self, value):
