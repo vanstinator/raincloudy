@@ -50,9 +50,15 @@ class RainCloudyController():
         if not faucets:
             raise TypeError("Controller does not have a faucet assigned.")
 
-        for index, faucet_id in enumerate(faucets):
+        for index, faucet in enumerate(faucets):
             self._faucets.append(
-                RainCloudyFaucet(self._parent, self, faucet_id, index))
+                RainCloudyFaucet(
+                    self._parent,
+                    self,
+                    faucet['serial'],
+                    index,
+                    faucet['zones']
+                ))
 
     def __repr__(self):
         """Object representation."""

@@ -113,7 +113,7 @@ def find_controller_or_faucet_name(data, p_type, index=0):
         return None
 
 
-def find_zone_name(data, zone_id):
+def find_zone_names(data):
     """
     Find on the HTML document the zone name.
 
@@ -121,7 +121,6 @@ def find_zone_name(data, zone_id):
     <span class="more_info" \
         title="Zone can be renamed on Setup tab">1 - zone1</span>,
 
-    :param zone_id:
     :param data: BeautifulSoup object
     :return: zone name
     :rtype: string
@@ -131,17 +130,25 @@ def find_zone_name(data, zone_id):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    table = data.find('table', {'class': 'zone_table'})
-    table_body = table.find('tbody')
-    rows = table_body.find_all('span', {'class': 'more_info'})
-    for row in rows:
-        if row.get_text().startswith(str(zone_id)):
-            zone_name = row.get_text()[4:].strip()
-            if zone_name != '':
-                return row.get_text()[4:].strip()
+    try:
+        zones = data.find('select', {'name': 'select_zone'}).find_all(
+            'option')
+    except AttributeError:
+        return ['1', '2', '3', '4']
 
-            return 'Zone {0}'.format(zone_id)
-    return None
+    zone_names = []
+
+    for zone in zones:
+        raw_name_array = zone.text.split('-')
+        if len(raw_name_array) > 1:
+            zone_names.append(raw_name_array[1].strip())
+        else:
+            zone_names.append('')
+
+            # This is a breaking change for downstream
+            # zone_names.append(f"Zone: {zone.text.strip()}")
+
+    return zone_names
 
 
 def find_selected_controller_or_faucet_index(data, p_type):

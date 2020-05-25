@@ -39,10 +39,10 @@ class TestRainCloudyHelpers(UnitTestBase):
 
     def test_find_zone_name(self):
         """test find_zone_name method."""
-        from raincloudy.helpers import find_zone_name
+        from raincloudy.helpers import find_zone_names
 
-        self.assertRaises(TypeError, find_zone_name, None, 1)
+        self.assertRaises(TypeError, find_zone_names, None, 1)
 
         # test when zone name is not found
         broken_html = generate_soup_html(load_fixture('home_broken.html'))
-        self.assertIsNone(find_zone_name(broken_html, 1))
+        self.assertEquals(find_zone_names(broken_html), ['1', '2', '3', '4'])
