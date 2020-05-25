@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """RainCloudy core object."""
-import requests
-import urllib3
 import os
 from pathlib import Path
+import requests
+import urllib3
 from raincloudy.const import (
     INITIAL_DATA, HEADERS, LOGIN_ENDPOINT, LOGOUT_ENDPOINT, SETUP_ENDPOINT,
     HOME_ENDPOINT)
@@ -130,13 +130,13 @@ class RainCloudy():
                         ).text)
 
             faucet_serials = faucet_serial_finder(self.html['setup'])
-        
+
             faucets = []
             for faucet_index, faucet_serial in enumerate(faucet_serials):
 
                 # We need to do a form submit for other faucets to get
                 # zone names
-                if (faucet_index > 0):
+                if faucet_index > 0:
                     data = {
                         'select_faucet': faucet_index
                     }

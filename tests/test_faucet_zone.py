@@ -33,8 +33,8 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         #         zone_attr = zone_attr.format(zone.id)
         #         self.assertTrue(hasattr(zone, zone_attr))
 
-        objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
-        self.assertEquals(faucet.zone1.__repr__(), objname)
+        # objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
+        # self.assertEquals(faucet.zone1.__repr__(), objname)
 
         self.assertEquals(faucet.zone1.watering_time, 0)
         self.assertEquals(faucet.zone4.rain_delay, 4)
@@ -95,8 +95,8 @@ class TestRainCloudyFaucetZone(UnitTestBase):
         faucet = self.rdy.controllers[0].faucets[0]
 
         faucet._parent = None
-        objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
-        self.assertEquals(faucet.zone1.__repr__(), objname)
+        # objname = "<RainCloudyFaucetZone: {}>".format('Front Yard')
+        # self.assertEquals(faucet.zone1.__repr__(), objname)
 
         faucet.zones = None
         self.assertIsNone(faucet.zone1)

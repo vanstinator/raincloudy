@@ -130,8 +130,11 @@ def find_zone_names(data):
     if not isinstance(data, BeautifulSoup):
         raise TypeError("Function requires BeautilSoup HTML element.")
 
-    zones = data.find('select', {'name': 'select_zone'}).find_all(
-        'option')
+    try:
+        zones = data.find('select', {'name': 'select_zone'}).find_all(
+            'option')
+    except AttributeError:
+        return ['1', '2', '3', '4']
 
     zone_names = []
 
@@ -142,10 +145,11 @@ def find_zone_names(data):
         else:
             zone_names.append('')
 
-            # TODO: This is a breaking change for downstream
+            # This is a breaking change for downstream
             # zone_names.append(f"Zone: {zone.text.strip()}")
 
     return zone_names
+
 
 def find_selected_controller_or_faucet_index(data, p_type):
     """

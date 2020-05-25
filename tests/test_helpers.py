@@ -45,4 +45,4 @@ class TestRainCloudyHelpers(UnitTestBase):
 
         # test when zone name is not found
         broken_html = generate_soup_html(load_fixture('home_broken.html'))
-        self.assertIsNone(find_zone_names(broken_html, 1))
+        self.assertEquals(find_zone_names(broken_html), ['1', '2', '3', '4'])
