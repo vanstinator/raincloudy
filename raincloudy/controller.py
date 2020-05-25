@@ -52,7 +52,13 @@ class RainCloudyController():
 
         for index, faucet in enumerate(faucets):
             self._faucets.append(
-                RainCloudyFaucet(self._parent, self, faucet['serial'], index, faucet['zones']))
+                RainCloudyFaucet(
+                    self._parent,
+                    self,
+                    faucet['serial'],
+                    index,
+                    faucet['zones']
+                ))
 
     def __repr__(self):
         """Object representation."""

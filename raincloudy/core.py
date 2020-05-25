@@ -122,13 +122,16 @@ class RainCloudy():
                     'select_controller': index
                 }
                 self.html['setup'] = \
-                    generate_soup_html(self.post(data,
-                                                 url=SETUP_ENDPOINT,
-                                                 referer=SETUP_ENDPOINT).text)
+                    generate_soup_html(
+                        self.post(
+                            data,
+                            url=SETUP_ENDPOINT,
+                            referer=SETUP_ENDPOINT
+                        ).text)
 
             faucet_serials = faucet_serial_finder(self.html['setup'])
-            
-            faucets = [];
+                    
+            faucets = []
             for faucet_index, faucet_serial in enumerate(faucet_serials):
 
                 # We need to do a form submit for other faucets to get
@@ -138,17 +141,13 @@ class RainCloudy():
                         'select_faucet': faucet_index
                     }
                     self.html['setup'] = \
-                        generate_soup_html(self.post(data,
-                                                    url=SETUP_ENDPOINT,
-                                                    referer=SETUP_ENDPOINT).text)
+                        generate_soup_html(
+                            self.post(
+                                data,
+                                url=SETUP_ENDPOINT,
+                                referer=SETUP_ENDPOINT
+                            ).text)
 
-
-                # faucet_serials[faucet_index] = {
-                #    {
-                #         faucet_serial: faucet_serials[faucet_index],
-                #         faucet_zone_names: zone_names
-                #    }
-                # }
                 zone_names = find_zone_names(self.html['setup'])
                 faucets.append({
                     'serial': faucet_serial,

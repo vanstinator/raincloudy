@@ -10,7 +10,7 @@ from raincloudy.helpers import (
 class RainCloudyFaucetCore():
     """RainCloudyFaucetCore object."""
 
-    def __init__(self, parent, controller, faucet_id, index, zone_names=[]):
+    def __init__(self, parent, controller, faucet_id, index, zone_names=None):
         """
         Initialize RainCloudy Controller object.
 
@@ -23,6 +23,8 @@ class RainCloudyFaucetCore():
         :return: RainCloudyFaucet object
         :rtype: RainCloudyFaucet object
         """
+        if zone_names is None: 
+            zone_names = []
 
         self.index = index
         self._parent = parent
