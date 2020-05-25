@@ -23,7 +23,7 @@ class RainCloudyFaucetCore():
         :return: RainCloudyFaucet object
         :rtype: RainCloudyFaucet object
         """
-        if zone_names is None: 
+        if zone_names is None:
             zone_names = []
 
         self.index = index

@@ -141,7 +141,7 @@ def find_zone_names(data):
             zone_names.append(raw_name_array[1].strip())
         else:
             zone_names.append('')
-            
+
             # TODO: This is a breaking change for downstream
             # zone_names.append(f"Zone: {zone.text.strip()}")
 

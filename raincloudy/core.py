@@ -130,7 +130,7 @@ class RainCloudy():
                         ).text)
 
             faucet_serials = faucet_serial_finder(self.html['setup'])
-                    
+        
             faucets = []
             for faucet_index, faucet_serial in enumerate(faucet_serials):
 
