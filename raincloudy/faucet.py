@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """RainCloud Faucet."""
+import time
+
 from raincloudy.const import (
     HOME_ENDPOINT, MANUAL_OP_DATA, MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS, MAX_WATERING_MINUTES, HEADERS, STATUS_ENDPOINT)
@@ -237,15 +239,21 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
                     ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
             )
 
+        ddata = self.preupdate()
+        attr = 'zone{}_select_manual_mode'.format(zoneid)
+
         if isinstance(value, int) and value == 0:
             value = 'OFF'
+
+            # If the zone is turned on at the valve we need to toggle ON before we can shut OFF
+            ddata[attr] = 'ON'
+            self.submit_action(ddata)
+            time.sleep(1)
         elif isinstance(value, str):
             value = value.upper()
             if value == 'ON':
                 value = MAX_WATERING_MINUTES
 
-        ddata = self.preupdate()
-        attr = 'zone{}_select_manual_mode'.format(zoneid)
         ddata[attr] = value
         self.submit_action(ddata)
 
