@@ -242,7 +242,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         ddata = self.preupdate()
         attr = 'zone{}_select_manual_mode'.format(zoneid)
 
-        if isinstance(value, int) and value == 0:
+        if (isinstance(value, int) and value == 0) \
+            or (isinstance(value, str) and value.lower() == 'off'):
             value = 'OFF'
 
             # If zone is turned on at the valve we need to toggle ON first
