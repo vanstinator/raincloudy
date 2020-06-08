@@ -245,7 +245,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         if isinstance(value, int) and value == 0:
             value = 'OFF'
 
-            # If the zone is turned on at the valve we need to toggle ON before we can shut OFF
+            # If zone is turned on at the valve we need to toggle ON first
             ddata[attr] = 'ON'
             self.submit_action(ddata)
             time.sleep(1)
