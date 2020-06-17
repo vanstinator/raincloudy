@@ -237,7 +237,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
             if value not in MANUAL_WATERING_ALLOWED:
                 raise ValueError(
                     'Valid options are: {}'.format(
-                    ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
+                         ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
                 )
         else:
             if (value < 0 or value > MAX_WATERING_MINUTES):
