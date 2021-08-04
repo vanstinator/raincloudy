@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import asyncio
-
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .core import RainCloudy
-from .faucet import RainCloudyFaucet, RainCloudyFaucetCore
+
 from ..const import SETUP_ENDPOINT
 from ..helpers import find_controller_or_faucet_name
+from .faucet import RainCloudyFaucet, RainCloudyFaucetCore
 
 
 class RainCloudyController:

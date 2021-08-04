@@ -1,5 +1,6 @@
 """Constants used by RainCloudy."""
 from __future__ import annotations
+
 from typing import Any
 
 API_URL = "https://wifiaquatimer.com"

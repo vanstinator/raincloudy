@@ -3,26 +3,27 @@ from __future__ import annotations
 
 import asyncio
 import os
-from pathlib import Path
 import ssl
+from pathlib import Path
 from typing import Any
+
 from aiohttp.client import ClientSession
 from aiohttp.client_reqrep import ClientResponse
 from bs4 import BeautifulSoup
 
 from ..const import (
-    INITIAL_DATA,
     HEADERS,
+    HOME_ENDPOINT,
+    INITIAL_DATA,
     LOGIN_ENDPOINT,
     LOGOUT_ENDPOINT,
     SETUP_ENDPOINT,
-    HOME_ENDPOINT,
 )
 from ..helpers import (
-    generate_soup_html,
-    faucet_serial_finder,
     controller_serial_finder,
+    faucet_serial_finder,
     find_zone_names,
+    generate_soup_html,
 )
 from .controller import RainCloudyController
 

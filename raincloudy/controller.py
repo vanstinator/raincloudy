@@ -2,8 +2,8 @@
 """RainCloud Controller."""
 
 import raincloudy
-from raincloudy.faucet import RainCloudyFaucet
 from raincloudy.const import SETUP_ENDPOINT
+from raincloudy.faucet import RainCloudyFaucet
 from raincloudy.helpers import find_controller_or_faucet_name
 
 

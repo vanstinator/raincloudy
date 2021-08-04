@@ -2,19 +2,19 @@
 from __future__ import annotations
 
 import asyncio
-
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .core import RainCloudy
     from .controller import RainCloudyController
+
 from ..const import (
+    HEADERS,
     HOME_ENDPOINT,
     MANUAL_OP_DATA,
     MANUAL_WATERING_ALLOWED,
     MAX_RAIN_DELAY_DAYS,
     MAX_WATERING_MINUTES,
-    HEADERS,
     STATUS_ENDPOINT,
 )
 from ..helpers import (
@@ -134,7 +134,8 @@ class RainCloudyFaucetCore:
         headers["X-Requested-With"] = "XMLHttpRequest"
         headers["X-CSRFToken"] = self._parent.csrftoken
 
-        url = f"{STATUS_ENDPOINT}?controller_serial={self._controller.serial}&faucet_serial={self.id}"
+        url = f"{STATUS_ENDPOINT}?controller_serial\
+={self._controller.serial}&faucet_serial={self.id}"
 
         async with self._parent.client.get(
             url, headers=headers, **self._parent._args
