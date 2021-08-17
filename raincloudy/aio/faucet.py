@@ -32,7 +32,7 @@ class RainCloudyFaucetCore:
         controller: RainCloudyController,
         faucet_id: int,
         index: int,
-        zone_names: list = [],
+        zone_names: list[str] = [],
     ):
         """
         Initialize RainCloudy Controller object.

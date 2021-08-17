@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.controller."""
-from tests.test_base import UnitTestBase
+from aioresponses import aioresponses
+from aiohttp import ClientSession
+from tests.test_base_aio import UnitTestBaseAsync
 from tests.extras import CONTROLLER_NAME, CONTROLLER_SERIAL, CONTROLLER_TIMESTAMP
 
 
-class TestRainCloudyController(UnitTestBase):
+class TestRainCloudyControllerAsync(UnitTestBaseAsync):
     """Unit tests for controller attributes."""
 
-    def test_errors_or_exceptions(self):
+    @aioresponses()
+    async def test_errors_or_exceptions(self, mocked):
         """Tests for errors or exceptions."""
-        from raincloudy.controller import RainCloudyController
+        from raincloudy.aio.controller import RainCloudyController
+
+        self.add_methods(mocked)
+        await self.rdy.login()
 
         controller = self.rdy.controllers[0]
 
@@ -24,8 +30,12 @@ class TestRainCloudyController(UnitTestBase):
         # try to create a Controller object without any faucets
         self.assertRaises(TypeError, RainCloudyController, self.rdy, CONTROLLER_SERIAL)
 
-    def test_attributes(self):
+    @aioresponses()
+    async def test_attributes(self, mocked):
         """Test controller attributes."""
+        self.add_methods(mocked)
+        await self.rdy.login()
+
         controller = self.rdy.controllers[0]
 
         self.assertTrue(hasattr(controller, "current_time"))
