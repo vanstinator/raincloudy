@@ -223,6 +223,11 @@ class RainCloudyFaucetZone:  # (RainCloudyFaucetCore):
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
+    @property
+    def current_time(self) -> str:
+        """Return controller current time."""
+        return self._controller.current_time
+
     # pylint: disable=invalid-name
     @property
     def id(self) -> int:

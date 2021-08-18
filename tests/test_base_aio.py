@@ -1,15 +1,7 @@
 """Define basic data for unittests."""
-import imp
-import sys
+import re
 
 import pytest
-
-# python 2.7 unicode compatibility
-try:
-    reload(sys)
-    sys.setdefaultencoding("utf8")
-except NameError:
-    pass
 
 import asyncio
 import unittest
@@ -58,7 +50,7 @@ class UnitTestBaseAsync(unittest.IsolatedAsyncioTestCase):
             content_type="text/html; charset=UTF-8",
         )
         mocked.get(
-            f"{STATUS_ENDPOINT}?controller_serial={CONTROLLER_SERIAL}&faucet_serial=1234",
+            re.compile(fr"^{STATUS_ENDPOINT}*"),
             status=200,
             body=load_fixture("get_cu_and_fu_status.json"),
         )
