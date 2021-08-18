@@ -1,13 +1,7 @@
 """Define basic data for unittests."""
 import re
-
-import pytest
-
-import asyncio
 import unittest
-from mock import patch
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
-from aiohttp import web, ClientSession
+from aiohttp import ClientSession
 from aioresponses import aioresponses
 
 from tests.extras import load_fixture, USERNAME, PASSWORD
@@ -20,8 +14,6 @@ from raincloudy.const import (
     HOME_ENDPOINT,
     SETUP_ENDPOINT,
 )
-
-from tests.extras import CONTROLLER_SERIAL
 
 
 class UnitTestBaseAsync(unittest.IsolatedAsyncioTestCase):
