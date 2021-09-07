@@ -11,20 +11,10 @@ from aiohttp.client import ClientSession
 from aiohttp.client_reqrep import ClientResponse
 from bs4 import BeautifulSoup
 
-from ..const import (
-    HEADERS,
-    HOME_ENDPOINT,
-    INITIAL_DATA,
-    LOGIN_ENDPOINT,
-    LOGOUT_ENDPOINT,
-    SETUP_ENDPOINT,
-)
-from ..helpers import (
-    controller_serial_finder,
-    faucet_serial_finder,
-    find_zone_names,
-    generate_soup_html,
-)
+from ..const import (HEADERS, HOME_ENDPOINT, INITIAL_DATA, LOGIN_ENDPOINT,
+                     LOGOUT_ENDPOINT, SETUP_ENDPOINT)
+from ..helpers import (controller_serial_finder, faucet_serial_finder,
+                       find_zone_names, generate_soup_html)
 from .controller import RainCloudyController
 
 
