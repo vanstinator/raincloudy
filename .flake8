@@ -1,6 +1,6 @@
 [flake8]
 exclude = docs,.tox,*.egg,*.pyc,.git,__pycache
-ignore = E722
+ignore = E722, W503
 max-line-length = 88
 extend-ignore =
     # See https://github.com/PyCQA/pycodestyle/issues/373

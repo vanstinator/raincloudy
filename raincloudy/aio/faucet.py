@@ -8,11 +8,19 @@ if TYPE_CHECKING:
     from .core import RainCloudy
     from .controller import RainCloudyController
 
-from ..const import (HEADERS, HOME_ENDPOINT, MANUAL_OP_DATA,
-                     MANUAL_WATERING_ALLOWED, MAX_RAIN_DELAY_DAYS,
-                     MAX_WATERING_MINUTES, STATUS_ENDPOINT)
-from ..helpers import (find_controller_or_faucet_name,
-                       find_selected_controller_or_faucet_index)
+from ..const import (
+    HEADERS,
+    HOME_ENDPOINT,
+    MANUAL_OP_DATA,
+    MANUAL_WATERING_ALLOWED,
+    MAX_RAIN_DELAY_DAYS,
+    MAX_WATERING_MINUTES,
+    STATUS_ENDPOINT,
+)
+from ..helpers import (
+    find_controller_or_faucet_name,
+    find_selected_controller_or_faucet_index,
+)
 
 
 class RainCloudyFaucetCore:
@@ -24,7 +32,7 @@ class RainCloudyFaucetCore:
         controller: RainCloudyController,
         faucet_id: int,
         index: int,
-        zone_names: list[str] = [],
+        zone_names: list[str] = None,
     ):
         """
         Initialize RainCloudy Controller object.
@@ -42,7 +50,7 @@ class RainCloudyFaucetCore:
         self._parent = parent
         self._controller = controller
         self._id = faucet_id
-        self._zone_names = zone_names
+        self._zone_names = zone_names if zone_names else []
         self._attributes: dict[str, Any] = {}
 
         # zones associated with faucet
