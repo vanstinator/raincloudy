@@ -2,7 +2,7 @@
   "extends": ["config:base"],
   "labels": ["dependencies"],
   "pip_requirements": {
-    "fileMatch": ["requirements_tests.txt", "requirements_docs.txt", "\\.requirements$"]
+    "fileMatch": ["requirements(.*).txt"]
   },
   "prConcurrentLimit": 3,
   "prHourlyLimit": 1,
