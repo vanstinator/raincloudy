@@ -1,0 +1,59 @@
+name: Tests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+  push:
+    branches:
+      - master
+
+
+jobs:
+  test:
+    name: Run tests on python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.8', '3.9']
+        include:
+          - python: '3.8'
+            toxenv: 'py38'
+          - python: '3.9'
+            toxenv: 'py39'
+          # - python: '3.10'
+          #   toxenv: 'py310'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Prepare test env
+        run: python -m pip install -U tox coveralls
+
+      - name: Test
+        run: TOXENV=${{ matrix.toxenv }} tox
+
+      - name: Coveralls
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel: true
+          flag-name: run-${{ matrix.toxenv }}
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel-finished: true
