@@ -19,11 +19,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.8']
+        python: ['3.8', '3.9', '3.10']
         include:
           - python: '3.8'
             toxenv: 'py38'
-
+          - python: '3.9'
+            toxenv: 'py39'
+          - python: '3.10'
+            toxenv: 'py310'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -46,6 +49,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
           flag-name: run-${{ matrix.python }}
           parallel: true
+          path-to-lcov: .coverage
 
   finish:
     needs: test
