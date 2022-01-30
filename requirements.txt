@@ -1,6 +1,6 @@
-beautifulsoup4==4.10.0
-requests==2.27.1
-urllib3==1.26.8
-html5lib==1.1
-aiohttp==3.8.1
-asyncio==3.4.3
+BeautifulSoup4>=4.0.1
+requests>=2.18.2
+urllib3>=1.22
+html5lib>=1.0.1
+aiohttp
+asyncio
