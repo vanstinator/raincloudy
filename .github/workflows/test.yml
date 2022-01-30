@@ -19,10 +19,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.6']
+        python: ['3.8']
         include:
-          - python: '3.6'
-            toxenv: 'py36'
+          - python: '3.8'
+            toxenv: 'py38'
 
     steps:
       - uses: actions/checkout@v2
