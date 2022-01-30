@@ -1,6 +1,9 @@
 {
   "extends": ["config:base"],
   "labels": ["dependencies"],
+  "pip_requirements": {
+    "fileMatch": ["requirements_tests.txt", "requirements_docs.txt", "\\.requirements$"]
+  },
   "prConcurrentLimit": 3,
   "prHourlyLimit": 1,
   "rebaseWhen": "auto",
