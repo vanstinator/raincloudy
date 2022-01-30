@@ -24,6 +24,7 @@ jobs:
         run: python -m build
 
       - name: Publish to PyPI
+        if: github.event_name != 'pull_request'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
