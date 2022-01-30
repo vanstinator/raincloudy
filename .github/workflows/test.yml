@@ -43,20 +43,17 @@ jobs:
       - name: Test
         run: TOXENV=${{ matrix.toxenv }} tox
 
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
+      - name: Coveralls
+        uses: AndreMiras/coveralls-python-action@develop
         with:
-          github-token: ${{ secrets.github_token }}
-          flag-name: run-${{ matrix.python }}
           parallel: true
-          path-to-lcov: .coverage
+          flag-name: run-${{ matrix.toxenv }}
 
   finish:
     needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
+      uses: AndreMiras/coveralls-python-action@develop
       with:
-        github-token: ${{ secrets.github_token }}
         parallel-finished: true
