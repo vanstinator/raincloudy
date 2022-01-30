@@ -7,7 +7,7 @@ local_scheme = "no-local-version"
 
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py38', 'py39', 'py310']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
