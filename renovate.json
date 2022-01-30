@@ -1,0 +1,8 @@
+{
+  "extends": ["config:base"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 1,
+  "rebaseWhen": "auto",
+  "reviewers": ["vanstinator"]
+}
