@@ -55,7 +55,7 @@
 <li><a href = "/manage" >Manage</a></li>
 <li><a href = "/logout">Logout</a></li>
 
-    
+
 </ul> </center>
 </div>
 
@@ -67,7 +67,7 @@
 	<div class="form">
     <form action="/setup" method="post" id="configure_form">
         <input type='hidden' name='csrfmiddlewaretoken' value='9Du8d2wNBcd1aNqux5WDf3651xBnbrV5PeyewkwXIfNADpJZwnjW8idOnSXLB7EE' />
-        
+
 <table>
      <tr>
      	<td class="COL-1">
@@ -75,11 +75,11 @@
         </td>
         <td>
         <select id="id_select_controller2" name="select_controller" onchange="submit()" >
-            
-                
+
+
                     <option value='0' selected='selected'>1 - ABCDEFGH</option>
-                
-            
+
+
         </select>
         <input type="submit" name="_set_default" value="Set Default" >
         <br/>
@@ -88,7 +88,7 @@
     </tr>
     <tr>
     	<td class="COL-1">
-        
+
         <label for="controller_name"><span class="more_info" title="Rename this Control Unit.  Press &#34;Set Name&#34; (Optional)">Control Unit Name:</span></label>
         </td>
         <td>
@@ -101,13 +101,13 @@
     <tr>
     	<td class="COL-1">
 
-        
+
         <label for="zipcode"><span class="more_info" title="Postal code for Control Unit location.  Sets time zone and enables weather forecast.">Control Unit Postal Code:</span></label>
          </td>
         <td>
-       
+
             <input type="text" name="zipcode_entry" value="49512" id="id_zipcode_entry" maxlength="7" />
-        
+
         <input type="submit" name="_set_zipcode" value="Set Postal Code" >
         <br/>
         <br/>
@@ -115,16 +115,16 @@
     </tr>
     <tr>
     	<td class="COL-1">
-        
+
         <label for="select_faucet"><span class="more_info" title="Select Valve Unit to display.">Select Valve Unit:</span></label>
          </td>
         <td>
         <select id="id_select_faucet2" name="select_faucet" onchange="submit()" >
-            
-                
+
+
                     <option value='0' selected='selected'>1 - 1234</option>
-                
-            
+
+
         </select>
         <label for="placeholder"></label>
         <!--<input type="submit" name="_set_default" value="Set Default">-->
@@ -145,28 +145,28 @@
     </tr>
     <tr>
     	<td class="COL-1">
-        
+
         <label for="select_zone"><span class="more_info" title="Select zone to display.">Select Zone:</label>
          </td>
         <td>
         <select id="id_select_zone" name="select_zone" onchange="submit()" >
-            
-                
+
+
                     <option value='0' selected='selected'>Front Yard</option>
-                
-            
-                
+
+
+
                     <option value='1'>2</option>
-                
-            
-                
+
+
+
                     <option value='2'>3</option>
-                
-            
-                
+
+
+
                     <option value='3'>4</option>
-                
-            
+
+
         </select>
         <!--<input type="submit" name="_set_editing_mode" value="Set Mode">-->
         <br/>
@@ -187,13 +187,13 @@
 </table>
 	<div align="center"><br/>
         <!-- Display any status messages provided by previous operations -->
-        
+
 
         <label for="placeholder"></label>
-        
+
 
             <input type="submit" name="_complete_setup" value="Complete Setup">
-        
+
         <label for="placeholder"></label>
     </form>
     </div>

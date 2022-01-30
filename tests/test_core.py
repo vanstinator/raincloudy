@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
-from tests.test_base import UnitTestBase
 from tests.extras import CONTROLLER_SERIAL
+from tests.test_base import UnitTestBase
 
 
 class TestRainCloudyCore(UnitTestBase):
@@ -22,8 +22,9 @@ class TestRainCloudyCore(UnitTestBase):
 
     def test_attributes(self):
         """Test core attributes."""
-        from raincloudy.controller import RainCloudyController
         from bs4 import BeautifulSoup
+
+        from raincloudy.controller import RainCloudyController
 
         self.assertTrue(hasattr(self.rdy, "client"))
         self.assertTrue(hasattr(self.rdy, "controllers"))

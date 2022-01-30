@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.controller."""
-from tests.test_base import UnitTestBase
 from tests.extras import CONTROLLER_NAME, CONTROLLER_SERIAL, CONTROLLER_TIMESTAMP
+from tests.test_base import UnitTestBase
 
 
 class TestRainCloudyController(UnitTestBase):

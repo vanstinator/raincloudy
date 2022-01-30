@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.faucet."""
-from aioresponses import aioresponses
 from aiohttp import ClientSession
-from tests.test_base_aio import UnitTestBaseAsync
+from aioresponses import aioresponses
+
 from tests.extras import FAUCET_NAME, FAUCET_SERIAL
+from tests.test_base_aio import UnitTestBaseAsync
 
 
 class TestRainCloudyFaucetAsync(UnitTestBaseAsync):

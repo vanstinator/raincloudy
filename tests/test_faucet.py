@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.faucet."""
-from tests.test_base import UnitTestBase
 from tests.extras import FAUCET_NAME, FAUCET_SERIAL
+from tests.test_base import UnitTestBase
 
 
 class TestRainCloudyFaucet(UnitTestBase):
@@ -10,14 +10,15 @@ class TestRainCloudyFaucet(UnitTestBase):
     def test_attributes(self):
         """Test faucet.attributes."""
         from raincloudy.faucet import RainCloudyFaucetZone
+
         faucet = self.rdy.controllers[0].faucets[0]
 
-        self.assertTrue(hasattr(faucet, 'battery'))
-        self.assertTrue(hasattr(faucet, 'id'))
-        self.assertTrue(hasattr(faucet, 'name'))
-        self.assertTrue(hasattr(faucet, 'serial'))
-        self.assertTrue(hasattr(faucet, 'status'))
-        self.assertTrue(hasattr(faucet, 'update'))
+        self.assertTrue(hasattr(faucet, "battery"))
+        self.assertTrue(hasattr(faucet, "id"))
+        self.assertTrue(hasattr(faucet, "name"))
+        self.assertTrue(hasattr(faucet, "serial"))
+        self.assertTrue(hasattr(faucet, "status"))
+        self.assertTrue(hasattr(faucet, "update"))
 
         # check zone attributes
         for zone_id in range(1, 5):
@@ -33,11 +34,12 @@ class TestRainCloudyFaucet(UnitTestBase):
 
         self.assertEquals(faucet.id, FAUCET_SERIAL)
         self.assertEquals(faucet.name, FAUCET_NAME)
-        self.assertEquals(faucet.status, 'Online')
+        self.assertEquals(faucet.status, "Online")
 
     def test_zones(self):
         """test faucet.zones attribute."""
         from raincloudy.faucet import RainCloudyFaucetZone
+
         faucet = self.rdy.controllers[0].faucets[0]
 
         zones = faucet.zones
@@ -52,5 +54,6 @@ class TestRainCloudyFaucet(UnitTestBase):
         faucet._controller = None
         objname = "<RainCloudyFaucet: {}>".format(FAUCET_SERIAL)
         self.assertEquals(faucet.__repr__(), objname)
+
 
 # vim:sw=4:ts=4:et:

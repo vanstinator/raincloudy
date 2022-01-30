@@ -101,6 +101,5 @@ ENV/
 .mypy_cache/
 
 .idea/
-.vscode/
 index.py
 test.py

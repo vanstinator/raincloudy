@@ -1,19 +1,19 @@
 """Define basic data for unittests."""
 import re
 import unittest
+
 from aiohttp import ClientSession
 from aioresponses import aioresponses
 
-from tests.extras import load_fixture, USERNAME, PASSWORD
-
 from raincloudy.aio.core import RainCloudy
 from raincloudy.const import (
+    HOME_ENDPOINT,
     LOGIN_ENDPOINT,
     LOGOUT_ENDPOINT,
-    STATUS_ENDPOINT,
-    HOME_ENDPOINT,
     SETUP_ENDPOINT,
+    STATUS_ENDPOINT,
 )
+from tests.extras import PASSWORD, USERNAME, load_fixture
 
 
 class UnitTestBaseAsync(unittest.IsolatedAsyncioTestCase):
@@ -42,7 +42,7 @@ class UnitTestBaseAsync(unittest.IsolatedAsyncioTestCase):
             content_type="text/html; charset=UTF-8",
         )
         mocked.get(
-            re.compile(fr"^{STATUS_ENDPOINT}*"),
+            re.compile(rf"^{STATUS_ENDPOINT}*"),
             status=200,
             body=load_fixture("get_cu_and_fu_status.json"),
         )

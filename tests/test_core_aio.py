@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
-from aioresponses import aioresponses
 from aiohttp import ClientSession
-from tests.test_base_aio import UnitTestBaseAsync
+from aioresponses import aioresponses
+
 from tests.extras import CONTROLLER_SERIAL
+from tests.test_base_aio import UnitTestBaseAsync
 
 
 class TestRainCloudyCoreAsync(UnitTestBaseAsync):
@@ -22,8 +23,9 @@ class TestRainCloudyCoreAsync(UnitTestBaseAsync):
     @aioresponses()
     async def test_login(self, mocked):
         """Test login."""
-        from raincloudy.aio.controller import RainCloudyController
         from bs4 import BeautifulSoup
+
+        from raincloudy.aio.controller import RainCloudyController
 
         self.add_methods(mocked)
         await self.rdy.login()

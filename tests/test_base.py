@@ -11,16 +11,16 @@ except NameError:
     pass
 
 import unittest
+
 import requests_mock
 
-from tests.extras import load_fixture, USERNAME, PASSWORD
-
 from raincloudy.const import (
-    LOGIN_ENDPOINT,
-    STATUS_ENDPOINT,
     HOME_ENDPOINT,
+    LOGIN_ENDPOINT,
     SETUP_ENDPOINT,
+    STATUS_ENDPOINT,
 )
+from tests.extras import PASSWORD, USERNAME, load_fixture
 
 
 class UnitTestBase(unittest.TestCase):

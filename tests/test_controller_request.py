@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.controller post."""
 import requests_mock
-from tests.test_base import UnitTestBase
-from raincloudy.const import STATUS_ENDPOINT, HOME_ENDPOINT, SETUP_ENDPOINT
+
+from raincloudy.const import HOME_ENDPOINT, SETUP_ENDPOINT, STATUS_ENDPOINT
 from tests.extras import load_fixture
+from tests.test_base import UnitTestBase
 
 
 class TestRainCloudyController(UnitTestBase):

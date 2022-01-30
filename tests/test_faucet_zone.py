@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.faucet.zone."""
-from tests.test_base import UnitTestBase
 from tests.extras import CONTROLLER_TIMESTAMP
+from tests.test_base import UnitTestBase
 
 
 class TestRainCloudyFaucetZone(UnitTestBase):
@@ -59,7 +59,7 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         # test if a non-valid parameter is passed
         for zone in faucet.zones:
-            self.assertIsNone(zone._set_rain_delay(zone.id, 'foorbar'))
+            self.assertIsNone(zone._set_rain_delay(zone.id, "foorbar"))
             self.assertIsNone(zone._set_rain_delay(zone.id, 100))
 
     def test_set_auto_watering(self):
@@ -68,17 +68,16 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         # test if a non-valid parameter is passed
         for zone in faucet.zones:
-            self.assertIsNone(zone._set_auto_watering(zone.id, 'foobar'))
+            self.assertIsNone(zone._set_auto_watering(zone.id, "foobar"))
 
     def test_set_watering_time(self):
         """Test faucet._set_watering_time method."""
         faucet = self.rdy.controllers[0].faucets[0]
 
         # verify allowed values
-        self.assertRaises(ValueError,
-                          faucet.zone1._set_manual_watering_time,
-                          faucet.zone1.id,
-                          1000)
+        self.assertRaises(
+            ValueError, faucet.zone1._set_manual_watering_time, faucet.zone1.id, 1000
+        )
 
     def test_watering_time(self):
         """Test faucet.watering_time property"""
@@ -100,5 +99,6 @@ class TestRainCloudyFaucetZone(UnitTestBase):
 
         faucet.zones = None
         self.assertIsNone(faucet.zone1)
+
 
 # vim:sw=4:ts=4:et:
