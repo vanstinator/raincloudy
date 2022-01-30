@@ -4,5 +4,8 @@ mock
 pylint
 pytest
 pytest-cov
+pytest-asyncio
+pytest-aiohttp
+aioresponses
 requests_mock
 tox

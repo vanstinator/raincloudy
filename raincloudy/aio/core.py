@@ -1,12 +1,17 @@
-# -*- coding: utf-8 -*-
 """RainCloudy core object."""
+from __future__ import annotations
+
+import asyncio
 import os
+import ssl
 from pathlib import Path
+from typing import Any
 
-import requests
-import urllib3
+from aiohttp.client import ClientSession
+from aiohttp.client_reqrep import ClientResponse
+from bs4 import BeautifulSoup
 
-from raincloudy.const import (
+from ..const import (
     HEADERS,
     HOME_ENDPOINT,
     INITIAL_DATA,
@@ -14,13 +19,13 @@ from raincloudy.const import (
     LOGOUT_ENDPOINT,
     SETUP_ENDPOINT,
 )
-from raincloudy.controller import RainCloudyController
-from raincloudy.helpers import (
+from ..helpers import (
     controller_serial_finder,
     faucet_serial_finder,
     find_zone_names,
     generate_soup_html,
 )
+from .controller import RainCloudyController
 
 
 class RainCloudy:
@@ -28,12 +33,11 @@ class RainCloudy:
 
     def __init__(
         self,
-        username,
-        password,
-        http_proxy=None,
-        https_proxy=None,
-        ssl_warnings=True,
-        ssl_verify=True,
+        username: str,
+        password: str,
+        client_session: ClientSession = None,
+        http_proxy: str = None,
+        ssl_verify: bool = True,
     ):
         """
         Initialize RainCloud object.
@@ -52,19 +56,22 @@ class RainCloudy:
         :type ssl_verify: boolean
         :rtype: RainCloudy object
         """
+        if client_session:
+            self.client = client_session
+            self._client_provided = True
+        else:
+            self.client = ClientSession()
+            self._client_provided = False
         self._ssl_verify = ssl_verify
-        if not ssl_warnings:
-            urllib3.disable_warnings()
 
         # define credentials
         self._username = username
         self._password = password
 
         # initialize future attributes
-        self._controllers = []
-        self.client = None
+        self._controllers: list[RainCloudyController] = []
         self.is_connected = False
-        self.html = {
+        self.html: dict[str, BeautifulSoup | None] = {
             "home": None,
             "setup": None,
             "program": None,
@@ -72,43 +79,30 @@ class RainCloudy:
         }
 
         # set proxy environment
-        self._proxies = {
-            "http": http_proxy,
-            "https": https_proxy,
-        }
+        self._args: dict[str, Any] = {"proxy": http_proxy, "ssl": None}
 
-        # login
-        self.login()
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object representation."""
-        for controller in self.controllers:
-            return "<{0}: {1}>".format(self.__class__.__name__, controller.serial)
+        return f"<{self.__class__.__name__}: {self.controllers[0].serial}>"
 
-    def login(self):
-        """Call login."""
-        return self._authenticate
-
-    @property
-    def _authenticate(self):
-        """Authenticate."""
-
+    async def login(self) -> None:
+        """Login to the raincloud cloud service."""
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__))
         )
 
-        cert_file = Path(__location__ + "/wifiaquatimer_com_chain.cer")
+        cert_file = Path(__location__, "../wifiaquatimer_com_chain.cer").resolve()
 
         # to obtain csrftoken, remove Referer from headers
         headers = HEADERS.copy()
         headers.pop("Referer")
 
         # initial GET request
-        self.client = requests.Session()
-        self.client.proxies = self._proxies
-        self.client.verify = cert_file.resolve()
-        self.client.stream = True
-        self.client.get(LOGIN_ENDPOINT, headers=headers)
+        # self.client = requests.Session()
+        # self._client_session.proxies = self._proxies
+        self._args["ssl"] = ssl.create_default_context(cafile=str(cert_file))
+        # self.client.verify = cert_file.resolve()
+        await self.client.get(LOGIN_ENDPOINT, headers=headers, **self._args)
 
         # set headers to submit POST request
         token = INITIAL_DATA.copy()
@@ -116,18 +110,23 @@ class RainCloudy:
         token["email"] = self._username
         token["password"] = self._password
 
-        req = self.client.post(LOGIN_ENDPOINT, data=token, headers=HEADERS)
+        async with self.client.post(
+            LOGIN_ENDPOINT,
+            data=token,
+            headers=HEADERS,
+            **self._args,
+        ) as req:
+            if req.status != 302:
+                req.raise_for_status()
 
-        if req.status_code != 302:
-            req.raise_for_status()
+        async with self.client.get(url=HOME_ENDPOINT, **self._args) as home:
+            self.html["home"] = generate_soup_html(await home.text())
 
-        home = self.client.get(url=HOME_ENDPOINT)
-
-        self.html["home"] = generate_soup_html(home.text)
-
-        setup = self.client.get(SETUP_ENDPOINT, headers=HEADERS)
-        # populate device list
-        self.html["setup"] = generate_soup_html(setup.text)
+        async with self.client.get(
+            SETUP_ENDPOINT, headers=HEADERS, **self._args
+        ) as setup:
+            # populate device list
+            self.html["setup"] = generate_soup_html(await setup.text())
 
         controller_serials = controller_serial_finder(self.html["setup"])
 
@@ -137,9 +136,9 @@ class RainCloudy:
             # faucet serials
             if index > 0:
                 data = {"select_controller": index}
-                self.html["setup"] = generate_soup_html(
-                    self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text
-                )
+                resp = await self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
+                if resp:
+                    self.html["setup"] = generate_soup_html(await resp.text())
 
             faucet_serials = faucet_serial_finder(self.html["setup"])
 
@@ -150,9 +149,11 @@ class RainCloudy:
                 # zone names
                 if faucet_index > 0:
                     data = {"select_faucet": faucet_index}
-                    self.html["setup"] = generate_soup_html(
-                        self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT).text
+                    resp = await self.post(
+                        data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT
                     )
+                    if resp:
+                        self.html["setup"] = generate_soup_html(await resp.text())
 
                 zone_names = find_zone_names(self.html["setup"])
                 faucets.append({"serial": faucet_serial, "zones": zone_names})
@@ -160,36 +161,39 @@ class RainCloudy:
             self._controllers.append(
                 RainCloudyController(self, controller_serial, index, faucets)
             )
+        await asyncio.gather(*[controller.update() for controller in self._controllers])
         self.is_connected = True
-        return True
 
     @property
-    def csrftoken(self):
+    def csrftoken(self) -> str:
         """Return current csrftoken from request session."""
         if self.client:
-            return self.client.cookies.get("csrftoken")
-        return None
+            for cookie in self.client.cookie_jar:
+                if cookie.key == "csrftoken":
+                    return cookie.value
+        return ""
 
-    def update(self):
+    async def update(self) -> None:
         """Update controller._attributes."""
-        for controller in self._controllers:
-            controller.update()
+        await asyncio.gather(*[controller.update() for controller in self._controllers])
 
     @property
-    def controllers(self):
+    def controllers(self) -> list[RainCloudyController]:
         """Show current linked controllers."""
         if hasattr(self, "_controllers"):
             return self._controllers
         raise AttributeError("There is no controller assigned.")
 
-    def update_home(self, data):
+    def update_home(self, data: str) -> None:
         """Update home html"""
         if not isinstance(data, str):
             raise TypeError("Function requires string response")
         self.html["home"] = generate_soup_html(data)
 
-    def post(self, ddata, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT):
-        """Method to update some attributes on namespace."""
+    async def post(
+        self, ddata: dict, url: str = SETUP_ENDPOINT, referer: str = SETUP_ENDPOINT
+    ) -> ClientResponse | None:
+        """Update some attributes on namespace."""
         headers = HEADERS.copy()
         if referer is None:
             headers.pop("Referer")
@@ -200,20 +204,23 @@ class RainCloudy:
         if "csrfmiddlewaretoken" not in ddata.keys():
             ddata["csrfmiddlewaretoken"] = self.csrftoken
 
-        req = self.client.post(url, headers=headers, data=ddata)
-        if not req.status_code == 200:
-            return None
+        async with self.client.post(
+            url, headers=headers, data=ddata, **self._args
+        ) as req:
+            if not req.status == 200:
+                return None
 
-        return req
+            return req
 
-    def logout(self):
+    async def logout(self) -> None:
         """Logout."""
-        self.client.get(LOGOUT_ENDPOINT)
+        await self.client.get(LOGOUT_ENDPOINT, **self._args)
+        if not self._client_provided:
+            await self.client.close()
         self._cleanup()
 
-    def _cleanup(self):
+    def _cleanup(self) -> None:
         """Cleanup object when logging out."""
-        self.client = None
         self._controllers = []
         self.is_connected = False
 

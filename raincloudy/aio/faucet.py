@@ -1,8 +1,14 @@
-# -*- coding: utf-8 -*-
 """RainCloud Faucet."""
-import time
+from __future__ import annotations
 
-from raincloudy.const import (
+import asyncio
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .core import RainCloudy
+    from .controller import RainCloudyController
+
+from ..const import (
     HEADERS,
     HOME_ENDPOINT,
     MANUAL_OP_DATA,
@@ -11,7 +17,7 @@ from raincloudy.const import (
     MAX_WATERING_MINUTES,
     STATUS_ENDPOINT,
 )
-from raincloudy.helpers import (
+from ..helpers import (
     find_controller_or_faucet_name,
     find_selected_controller_or_faucet_index,
 )
@@ -20,7 +26,14 @@ from raincloudy.helpers import (
 class RainCloudyFaucetCore:
     """RainCloudyFaucetCore object."""
 
-    def __init__(self, parent, controller, faucet_id, index, zone_names=None):
+    def __init__(
+        self,
+        parent: RainCloudy,
+        controller: RainCloudyController,
+        faucet_id: int,
+        index: int,
+        zone_names: list[str] = None,
+    ):
         """
         Initialize RainCloudy Controller object.
 
@@ -33,95 +46,87 @@ class RainCloudyFaucetCore:
         :return: RainCloudyFaucet object
         :rtype: RainCloudyFaucet object
         """
-        if zone_names is None:
-            zone_names = []
-
         self.index = index
         self._parent = parent
         self._controller = controller
         self._id = faucet_id
-        self._attributes = {}
-        self._zone_names = zone_names
+        self._zone_names = zone_names if zone_names else []
+        self._attributes: dict[str, Any] = {}
 
         # zones associated with faucet
-        self.zones = []
+        self.zones = self._create_zones()
 
-        # load assigned zones
-        self._assign_zones()
-
-    def _assign_zones(self):
+    def _create_zones(self) -> list[RainCloudyFaucetZone]:
         """Assign all RainCloudyFaucetZone managed by faucet."""
-        for zone_id in range(1, 5):
-            zone = RainCloudyFaucetZone(
+        return [
+            RainCloudyFaucetZone(
                 parent=self._parent,
                 controller=self._controller,
                 faucet=self,
                 zone_id=zone_id,
                 zone_name=self._zone_names[zone_id - 1],
             )
+            for zone_id in range(1, 5)
+        ]
 
-            if zone not in self.zones:
-                self.zones.append(zone)
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object representation."""
         try:
-            return "<{0}: {1}>".format(self.__class__.__name__, self.name)
+            return f"<{self.__class__.__name__}: {self.name}>"
         except AttributeError:
-            return "<{0}: {1}>".format(self.__class__.__name__, self.id)
+            return f"<{self.__class__.__name__}: {self.id}>"
 
     @property
-    def attributes(self):
+    def attributes(self) -> dict[str, Any]:
         """Return faucet id."""
         return self._attributes
 
     @property
-    def serial(self):
+    def serial(self) -> int | str:
         """Return faucet id."""
-        return self.id
+        return self._id
 
     # pylint: disable=invalid-name
     @property
-    def id(self):
-        """Return controller id."""
+    def id(self) -> int | str:
+        """Return faucet id."""
         return self._id
 
     @property
-    def current_time(self):
+    def current_time(self) -> str:
         """Return controller current time."""
         return self._controller.current_time
 
     @property
-    def name(self):
+    def name(self) -> str | None:
         """Return faucet name."""
         return find_controller_or_faucet_name(
             self._controller.home, "faucet", self.index
         )
 
-    @name.setter
-    def name(self, value):
+    async def update_name(self, value: str) -> None:
         """Set a new name to faucet."""
         data = {
             "_set_faucet_name": "Set Name",
             "select_faucet": self.index,
             "faucet_name": value,
         }
-        self._parent.post(data)
+        await self._parent.post(data)
 
     @property
-    def status(self):
+    def status(self) -> str:
         """Return status."""
         return self._attributes["faucet_status"]
 
     @property
-    def battery(self):
+    def battery(self) -> str | None:
         """Return faucet battery."""
         battery = self._attributes["battery_percent"]
         if battery == "" or battery is None:
             return None
         return battery.strip("%")
 
-    def update(self):
+    async def update(self) -> None:
         """Submit GET request to update information."""
         # adjust headers
         headers = HEADERS.copy()
@@ -129,26 +134,22 @@ class RainCloudyFaucetCore:
         headers["X-Requested-With"] = "XMLHttpRequest"
         headers["X-CSRFToken"] = self._parent.csrftoken
 
-        args = (
-            "?controller_serial="
-            + self._controller.serial
-            + "&faucet_serial="
-            + self.id
-        )
+        url = f"{STATUS_ENDPOINT}?controller_serial\
+={self._controller.serial}&faucet_serial={self.id}"
 
-        req = self._parent.client.get(STATUS_ENDPOINT + args, headers=headers)
+        async with self._parent.client.get(
+            url, headers=headers, **self._parent._args
+        ) as req:
+            # token probably expired, then try again
+            if req.status == 403:
+                await self._parent.login()
+                await self.update()
+            elif req.status == 200:
+                self._controller.attributes = self._attributes = await req.json()
+            else:
+                req.raise_for_status()
 
-        # token probably expired, then try again
-        if req.status_code == 403:
-            self._parent.login()
-            self.update()
-        elif req.status_code == 200:
-            self._attributes = req.json()
-            self._controller.attributes = self._attributes
-        else:
-            req.raise_for_status()
-
-    def _find_zone_by_id(self, zone_id):
+    def _find_zone_by_id(self, zone_id) -> RainCloudyFaucetZone | None:
         """Return zone by id."""
         if not self.zones:
             return None
@@ -162,32 +163,39 @@ class RainCloudyFaucet(RainCloudyFaucetCore):
     """RainCloudyFaucet object."""
 
     @property
-    def zone1(self):
+    def zone1(self) -> RainCloudyFaucetZone | None:
         """Return zone managed by faucet."""
         return self._find_zone_by_id(1)
 
     @property
-    def zone2(self):
+    def zone2(self) -> RainCloudyFaucetZone | None:
         """Return zone managed by faucet."""
         return self._find_zone_by_id(2)
 
     @property
-    def zone3(self):
+    def zone3(self) -> RainCloudyFaucetZone | None:
         """Return zone managed by faucet."""
         return self._find_zone_by_id(3)
 
     @property
-    def zone4(self):
+    def zone4(self) -> RainCloudyFaucetZone | None:
         """Return zone managed by faucet."""
         return self._find_zone_by_id(4)
 
 
-class RainCloudyFaucetZone(RainCloudyFaucetCore):
+class RainCloudyFaucetZone:  # (RainCloudyFaucetCore):
     """RainCloudyFaucetZone object."""
 
     # pylint: disable=super-init-not-called
     # needs review later
-    def __init__(self, parent, controller, faucet, zone_id, zone_name):
+    def __init__(
+        self,
+        parent: RainCloudy,
+        controller: RainCloudyController,
+        faucet: RainCloudyFaucetCore,
+        zone_id: int,
+        zone_name: str,
+    ):
         """
         Initialize RainCloudy Controller object.
 
@@ -208,15 +216,26 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         self._id = zone_id
         self._name = zone_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object representation."""
         try:
             return "<{0}: {1}>".format(self.__class__.__name__, self.name)
         except AttributeError:
             return "<{0}: {1}>".format(self.__class__.__name__, self.id)
 
-    def _set_zone_name(self, zoneid, name):
-        """Private method to override zone name."""
+    @property
+    def current_time(self) -> str:
+        """Return controller current time."""
+        return self._controller.current_time
+
+    # pylint: disable=invalid-name
+    @property
+    def id(self) -> int:
+        """Return zone id."""
+        return self._id
+
+    async def set_zone_name(self, zoneid, name) -> None:
+        """Set zone name."""
         # zone starts with index 0
         zoneid -= 1
         data = {
@@ -226,20 +245,19 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
             "select_zone": str(zoneid),
             "zone_name": name,
         }
-        self._parent.post(data)
+        await self._parent.post(data)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return zone name."""
         return self._name
 
-    @name.setter
-    def name(self, value):
+    async def update_name(self, value: str) -> None:
         """Set a new zone name to faucet."""
-        self._set_zone_name(self.id, value)
+        await self.set_zone_name(self.id, value)
 
-    def _set_manual_watering_time(self, zoneid, value):
-        """Private method to set watering_time per zone."""
+    async def set_manual_watering_time(self, value: str | int) -> None:
+        """Set watering_time per zone."""
         if value not in MANUAL_WATERING_ALLOWED:
             raise ValueError(
                 "Valid options are: {}".format(
@@ -247,8 +265,8 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
                 )
             )
 
-        ddata = self.preupdate()
-        attr = "zone{}_select_manual_mode".format(zoneid)
+        ddata = await self.preupdate()
+        attr = "zone{}_select_manual_mode".format(self.id)
 
         if (isinstance(value, int) and value == 0) or (
             isinstance(value, str) and value.lower() == "off"
@@ -257,18 +275,18 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
             # If zone is turned on at the valve we need to toggle ON first
             ddata[attr] = "ON"
-            self.submit_action(ddata)
-            time.sleep(1)
+            await self.submit_action(ddata)
+            await asyncio.sleep(1)
         elif isinstance(value, str):
             value = value.upper()
             if value == "ON":
                 value = MAX_WATERING_MINUTES
 
         ddata[attr] = value
-        self.submit_action(ddata)
+        await self.submit_action(ddata)
 
     @property
-    def watering_time(self):
+    def watering_time(self) -> int:
         """Return watering_time from zone."""
         auto_watering_time = self.lookup_attr("auto_watering_time")
 
@@ -282,20 +300,12 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         return watering_time
 
     @property
-    def manual_watering(self):
+    def manual_watering(self) -> bool:
         """Return zone manual_mode_on"""
         return self.lookup_attr("manual_mode_on")
 
-    @manual_watering.setter
-    def manual_watering(self, value):
-        """Manually turn on water for X minutes."""
-        return self._set_manual_watering_time(self.id, value)
-
-    def _set_rain_delay(self, zoneid, value):
-        """Generic method to set auto_watering program."""
-        # current index for rain_delay starts in 0
-        zoneid -= 1
-
+    async def set_rain_delay(self, value: int | str | None) -> None:
+        """Set rain delay."""
         if isinstance(value, int):
             if value > MAX_RAIN_DELAY_DAYS or value < 0:
                 value = None
@@ -312,34 +322,27 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         if value is None:
             return None
 
-        ddata = self.preupdate()
-        attr = "zone{}_rain_delay_select".format(zoneid)
-        ddata[attr] = value
-        self.submit_action(ddata)
-        return True
+        ddata = await self.preupdate()
+        ddata[f"zone{self.id}_rain_delay_select"] = value
+        await self.submit_action(ddata)
 
     @property
-    def rain_delay(self):
+    def rain_delay(self) -> int:
         """Return the rain delay day from zone."""
         return self.lookup_attr("rain_delay_mode")
 
-    @rain_delay.setter
-    def rain_delay(self, value):
-        """Set number of rain delay days for zone."""
-        return self._set_rain_delay(self.id, value)
-
     @property
-    def next_cycle(self):
+    def next_cycle(self) -> str:
         """Return the time scheduled for next watering from zone."""
         return self.lookup_attr("next_water_cycle")
 
-    def _set_auto_watering(self, zoneid, value):
-        """Private method to set auto_watering program."""
+    async def set_auto_watering(self, value: bool):
+        """Set auto_watering program."""
         if not isinstance(value, bool):
             return None
 
-        ddata = self.preupdate()
-        attr = "zone{}_program_toggle".format(zoneid)
+        ddata = await self.preupdate()
+        attr = f"zone{self.id}_program_toggle"
         try:
             if not value:
                 ddata.pop(attr)
@@ -348,55 +351,50 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         except KeyError:
             pass
 
-        self.submit_action(ddata)
+        await self.submit_action(ddata)
         return True
 
     @property
-    def auto_watering(self):
+    def auto_watering(self) -> bool:
         """Return if zone is configured to automatic watering."""
         return self.lookup_attr("program_mode_on")
 
-    @auto_watering.setter
-    def auto_watering(self, value):
-        """Enable/disable zone auto_watering program."""
-        return self._set_auto_watering(self.id, bool(value))
-
     @property
-    def is_watering(self):
+    def is_watering(self) -> bool:
         """Return boolean if zone is watering."""
         return bool(self.watering_time > 0)
 
-    def lookup_attr(self, attr):
+    def lookup_attr(self, attr: str) -> Any:
         """Returns rain_delay_mode attributes by zone index"""
         return self._faucet.attributes["rain_delay_mode"][int(self.id) - 1][attr]
 
-    def _to_dict(self):
+    def _to_dict(self) -> dict:
         """Method to build zone dict."""
         return {
-            "auto_watering": getattr(self, "auto_watering"),
-            "manual_watering": getattr(self, "manual_watering"),
-            "is_watering": getattr(self, "is_watering"),
-            "name": getattr(self, "name"),
-            "next_cycle": getattr(self, "next_cycle"),
-            "rain_delay": getattr(self, "rain_delay"),
-            "watering_time": getattr(self, "watering_time"),
+            "auto_watering": self.auto_watering,
+            "manual_watering": self.manual_watering,
+            "is_watering": self.is_watering,
+            "name": self.name,
+            "next_cycle": self.next_cycle,
+            "rain_delay": self.rain_delay,
+            "watering_time": self.watering_time,
         }
 
-    def report(self):
+    def report(self) -> dict:
         """Return status from zone."""
         return self._to_dict()
 
-    def update(self):
+    async def update(self) -> None:
         """Request faucet to update"""
-        return self._faucet.update()
+        await self._faucet.update()
 
-    def preupdate(self, force_refresh=True):
+    async def preupdate(self, force_refresh: bool = True) -> dict:
         """Return a dict with all current options prior submitting request."""
         ddata = MANUAL_OP_DATA.copy()
 
         # force update to make sure status is accurate
         if force_refresh:
-            self._faucet.update()
+            await self._faucet.update()
 
         # select current controller and faucet
         ddata["select_controller"] = self._parent.controllers.index(self._controller)
@@ -406,20 +404,20 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
         # only add zoneX_program_toogle to ddata when needed,
         # otherwise the field will be always on
         for zone in self._faucet.zones:
-            attr = "zone{}_program_toggle".format(zone.id)
+            attr = f"zone{zone.id}_program_toggle"
             if zone.auto_watering:
                 ddata[attr] = "on"
 
         # check if zone current watering manually (zone1_select_manual_mode)
         for zone in self._faucet.zones:
-            attr = "zone{}_select_manual_mode".format(zone.id)
+            attr = f"zone{zone.id}_select_manual_mode"
             if zone.watering_time and attr in ddata.keys():
                 ddata[attr] = zone.watering_time
 
         # check if rain delay is selected (zone0_rain_delay_select)
         for zone in self._faucet.zones:
             attr = "zone{}_rain_delay_select".format(zone.id - 1)
-            value = zone.rain_delay
+            value: str | int = zone.rain_delay
             if value and attr in ddata.keys():
                 if int(value) >= 2 and int(value) <= 7:
                     value = str(value) + "days"
@@ -429,7 +427,7 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
         return ddata
 
-    def submit_action(self, ddata):
+    async def submit_action(self, ddata: dict) -> None:
         """Post data."""
 
         controller_index = self._parent.controllers.index(self._controller)
@@ -453,8 +451,10 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
             current_controller_index != controller_index
             or current_faucet_index != faucet_index
         ):
-            self._parent.post(ddata, url=HOME_ENDPOINT, referer=HOME_ENDPOINT)
+            await self._parent.post(ddata, url=HOME_ENDPOINT, referer=HOME_ENDPOINT)
 
-        response = self._parent.post(ddata, url=HOME_ENDPOINT, referer=HOME_ENDPOINT)
-
-        self._parent.update_home(response.text)
+        response = await self._parent.post(
+            ddata, url=HOME_ENDPOINT, referer=HOME_ENDPOINT
+        )
+        if response:
+            self._parent.update_home(await response.text())

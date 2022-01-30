@@ -1,16 +1,27 @@
-# -*- coding: utf-8 -*-
 """RainCloud Controller."""
+from __future__ import annotations
 
-import raincloudy
-from raincloudy.const import SETUP_ENDPOINT
-from raincloudy.faucet import RainCloudyFaucet
-from raincloudy.helpers import find_controller_or_faucet_name
+import asyncio
+from typing import TYPE_CHECKING, Any
+
+from ..const import SETUP_ENDPOINT
+from ..helpers import find_controller_or_faucet_name
+from .faucet import RainCloudyFaucet, RainCloudyFaucetCore
+
+if TYPE_CHECKING:
+    from .core import RainCloudy
 
 
 class RainCloudyController:
     """RainCloudy Controller object."""
 
-    def __init__(self, parent, controller_id, index, faucets=None):
+    def __init__(
+        self,
+        parent: "RainCloudy",
+        controller_id: str,
+        index: int,
+        faucets: list[dict[str, Any]] | None = None,
+    ):
         """
         Initialize RainCloudy Controller object.
 
@@ -23,95 +34,77 @@ class RainCloudyController:
         :return: RainCloudyController object
         :rtype: RainCloudyController object
         """
-        self.attributes = {}
         self._parent = parent
         self.home = parent.html["home"]
         self._controller_id = controller_id
         self.index = index
-
-        self._verify_parent()
-
+        self.attributes: dict[str, Any] = {}
         # faucets associated with controller
-        self._faucets = []
+        self._faucets = self._create_faucets(faucets)
 
-        # load assigned faucets
-        self._assign_faucets(faucets)
-
-        # populate controller attributes
-        self.update()
-
-    def _verify_parent(self):
-        """Verify parent type."""
-        if not isinstance(self._parent, raincloudy.core.RainCloudy):
-            raise TypeError("Invalid parent object.")
-
-    def _assign_faucets(self, faucets):
+    def _create_faucets(self, faucets: list[dict] | None) -> list[RainCloudyFaucetCore]:
         """Assign RainCloudyFaucet objects to self._faucets."""
         if not faucets:
             raise TypeError("Controller does not have a faucet assigned.")
 
-        for index, faucet in enumerate(faucets):
-            self._faucets.append(
-                RainCloudyFaucet(
-                    self._parent, self, faucet["serial"], index, faucet["zones"]
-                )
+        return [
+            RainCloudyFaucet(
+                self._parent, self, faucet["serial"], index, faucet["zones"]
             )
+            for index, faucet in enumerate(faucets)
+        ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object representation."""
         try:
-            return "<{0}: {1}>".format(self.__class__.__name__, self.name)
+            return f"<{self.__class__.__name__}: {self.name}>"
         except AttributeError:
-            return "<{0}: {1}>".format(self.__class__.__name__, self.id)
+            return f"<{self.__class__.__name__}: {self.id}>"
 
-    def update(self):
-        """
-        Call 1 method to update zone attributes
-        """
+    async def update(self) -> None:
+        """Call 1 method to update zone attributes."""
         # update zone attributes
-        for faucet in self._faucets:
-            faucet.update()
+        await asyncio.gather(*[faucet.update() for faucet in self._faucets])
 
     @property
-    def serial(self):
+    def serial(self) -> str:
         """Return controller id."""
         return self._controller_id
 
     # pylint: disable=invalid-name
     @property
-    def id(self):
+    def id(self) -> str:
         """Return controller id."""
-        return self.serial
+        return self._controller_id
 
     @property
-    def name(self):
+    def name(self) -> str | None:
         """Return controller name."""
         return find_controller_or_faucet_name(
             self._parent.html["home"], "controller", self.index
         )
 
-    @name.setter
-    def name(self, value):
+    async def update_name(self, value) -> None:
         """Set a new name to controller."""
         data = {
             "select_controller": self.index,
             "_set_controller_name": "Set Name",
             "controller_name": value,
         }
-        self._parent.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
+        await self._parent.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
 
     @property
-    def status(self):
+    def status(self) -> str:
         """Return controller status."""
         return self.attributes["controller_status"]
 
     @property
-    def current_time(self):
+    def current_time(self) -> str:
         """Return controller current time."""
         return self.attributes["current_time"]
 
     @property
-    def faucets(self):
+    def faucets(self) -> list[RainCloudyFaucetCore]:
         """Show current linked faucet."""
         if hasattr(self, "_faucets"):
             return self._faucets

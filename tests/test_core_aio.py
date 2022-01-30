@@ -1,30 +1,32 @@
 # -*- coding: utf-8 -*-
 """Test raincloudy.core."""
-from tests.test_base import UnitTestBase
+from aioresponses import aioresponses
+from aiohttp import ClientSession
+from tests.test_base_aio import UnitTestBaseAsync
 from tests.extras import CONTROLLER_SERIAL
 
 
-class TestRainCloudyCore(UnitTestBase):
+class TestRainCloudyCoreAsync(UnitTestBaseAsync):
     """Unit tests for core attributes."""
 
-    def test_client_attrs(self):
+    @aioresponses()
+    async def test_client_attrs(self, mocked):
         """Test client (requests.Session) attributes."""
-        import requests
 
-        self.assertIsInstance(self.rdy.client, requests.Session)
-        self.assertListEqual(list(self.rdy.client.proxies.values()), [None, None])
-        self.assertTrue(self.rdy.client.verify)
-        self.assertTrue(self.rdy.client.stream)
+        self.add_methods(mocked)
+        await self.rdy.login()
+
+        self.assertIsInstance(self.rdy.client, ClientSession)
         self.assertEqual(self.rdy.is_connected, True)
 
-    # def test_errors_or_exceptions(self):
-    #     """Tests for errors or exceptions."""
-
-    def test_attributes(self):
-        """Test core attributes."""
-        from raincloudy.controller import RainCloudyController
+    @aioresponses()
+    async def test_login(self, mocked):
+        """Test login."""
+        from raincloudy.aio.controller import RainCloudyController
         from bs4 import BeautifulSoup
 
+        self.add_methods(mocked)
+        await self.rdy.login()
         self.assertTrue(hasattr(self.rdy, "client"))
         self.assertTrue(hasattr(self.rdy, "controllers"))
         self.assertTrue(hasattr(self.rdy, "controllers"))
@@ -45,7 +47,4 @@ class TestRainCloudyCore(UnitTestBase):
         self.assertIsNone(self.rdy.html["program"])
         self.assertIsNone(self.rdy.html["manage"])
 
-        self.assertIsNone(self.rdy.logout())
-
-
-# vim:sw=4:ts=4:et:
+        self.assertIsNone(await self.rdy.logout())
