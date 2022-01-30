@@ -4,11 +4,11 @@ on: [push, pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheels on ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-10.15]
+        py_ver: [3.8, 3.9, 3.10]
 
     steps:
       - uses: actions/checkout@v2
@@ -16,24 +16,16 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.py_ver }}
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v1
+      - name: Prepare build env
+        run: python -m pip install build
+
+      - name: Prepare build env
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          platforms: all
-
-      - name: test
-        run: ONLY_PURE='' python -m pip install wheel
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
-        env:
-          # configure cibuildwheel to build native archs ('auto'), and some
-          # emulated ones
-          CIBW_ARCHS_LINUX: auto aarch64 ppc64le s390x
-
-      - uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
