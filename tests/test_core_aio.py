@@ -41,7 +41,7 @@ class TestRainCloudyCoreAsync(UnitTestBaseAsync):
         objname = "<RainCloudy: {}>".format(CONTROLLER_SERIAL)
         self.assertEquals(self.rdy.__repr__(), objname)
 
-        self.assertEqual(1, len(self.rdy.controllers))
+        self.assertEqual(2, len(self.rdy.controllers))
         self.assertIsInstance(self.rdy.controllers[0], RainCloudyController)
 
         self.assertIsInstance(self.rdy.html["home"], BeautifulSoup)

@@ -34,29 +34,41 @@ class UnitTestBaseAsync(unittest.IsolatedAsyncioTestCase):
             status=200,
             body=load_fixture("setup.html"),
             content_type="text/html; charset=UTF-8",
+            repeat=True,
         )
         mocked.get(
             LOGIN_ENDPOINT,
             status=200,
             body=load_fixture("home.html"),
             content_type="text/html; charset=UTF-8",
+            repeat=True,
         )
         mocked.get(
             re.compile(rf"^{STATUS_ENDPOINT}*"),
             status=200,
+            repeat=True,
             body=load_fixture("get_cu_and_fu_status.json"),
         )
         mocked.post(
             LOGIN_ENDPOINT,
             status=200,
+            repeat=True,
             body=load_fixture("home.html"),
             content_type="text/html; charset=UTF-8",
         )
         mocked.get(
             HOME_ENDPOINT,
             status=200,
+            repeat=True,
             body=load_fixture("home.html"),
             content_type="text/html; charset=UTF-8",
         )
-        mocked.get(LOGOUT_ENDPOINT, status=200)
-        mocked.post(SETUP_ENDPOINT)
+        mocked.get(LOGOUT_ENDPOINT, repeat=True, status=200)
+        mocked.post(
+            SETUP_ENDPOINT,
+            status=200,
+            repeat=True,
+            headers={"Referer": SETUP_ENDPOINT},
+            body=load_fixture("setup.html"),
+            content_type="text/html; charset=UTF-8",
+        )
