@@ -33,6 +33,7 @@ class UnitTestBase(unittest.TestCase):
 
         mock.get(LOGIN_ENDPOINT, text=load_fixture("home.html"))
         mock.get(SETUP_ENDPOINT, text=load_fixture("setup.html"))
+        mock.post(SETUP_ENDPOINT, text=load_fixture("setup.html"))
         mock.get(STATUS_ENDPOINT, text=load_fixture("get_cu_and_fu_status.json"))
 
         mock.post(LOGIN_ENDPOINT, text=load_fixture("home.html"))

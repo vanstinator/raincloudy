@@ -136,9 +136,9 @@ class RainCloudy:
             # faucet serials
             if index > 0:
                 data = {"select_controller": index}
-                resp = await self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
-                if resp:
-                    self.html["setup"] = generate_soup_html(await resp.text())
+                resp_text = await self.post(data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT)
+                if resp_text:
+                    self.html["setup"] = generate_soup_html(resp_text)
 
             faucet_serials = faucet_serial_finder(self.html["setup"])
 
@@ -149,11 +149,12 @@ class RainCloudy:
                 # zone names
                 if faucet_index > 0:
                     data = {"select_faucet": faucet_index}
-                    resp = await self.post(
+
+                    resp_text = await self.post(
                         data, url=SETUP_ENDPOINT, referer=SETUP_ENDPOINT
                     )
-                    if resp:
-                        self.html["setup"] = generate_soup_html(await resp.text())
+                    if resp_text:
+                        self.html["setup"] = generate_soup_html(resp_text)
 
                 zone_names = find_zone_names(self.html["setup"])
                 faucets.append({"serial": faucet_serial, "zones": zone_names})
@@ -192,8 +193,8 @@ class RainCloudy:
 
     async def post(
         self, ddata: dict, url: str = SETUP_ENDPOINT, referer: str = SETUP_ENDPOINT
-    ) -> ClientResponse | None:
-        """Update some attributes on namespace."""
+    ) -> str | None:
+        """Update some attributes on namespace and return the body."""
         headers = HEADERS.copy()
         if referer is None:
             headers.pop("Referer")
@@ -210,7 +211,7 @@ class RainCloudy:
             if not req.status == 200:
                 return None
 
-            return req
+            return await req.text()
 
     async def logout(self) -> None:
         """Logout."""
