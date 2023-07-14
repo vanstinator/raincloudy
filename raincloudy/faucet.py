@@ -233,11 +233,11 @@ class RainCloudyFaucetZone(RainCloudyFaucetCore):
 
     def _set_manual_watering_time(self, zoneid, value):
         """Private method to set watering_time per zone."""
-        if (isinstance(value, str)):
-            if value not in MANUAL_WATERING_ALLOWED or (value <= 0 and value > MAX_WATERING_MINUTES):
+        if isinstance(value, str):
+            if value not in MANUAL_WATERING_ALLOWED:
                 raise ValueError(
                     'Valid options are: {}'.format(
-                    ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
+                        ', '.join(map(str, MANUAL_WATERING_ALLOWED)))
                 )
         else:
             if (value < 0 or value > MAX_WATERING_MINUTES):
