@@ -79,7 +79,7 @@ class RainCloudy():
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-        cert_file = Path(__location__ + "/wifiaquatimer_com_chain.cer")
+        #cert_file = Path(__location__ + "/wifiaquatimer_com_chain.cer")
 
         # to obtain csrftoken, remove Referer from headers
         headers = HEADERS.copy()
@@ -88,7 +88,7 @@ class RainCloudy():
         # initial GET request
         self.client = requests.Session()
         self.client.proxies = self._proxies
-        self.client.verify = cert_file.resolve()
+        #self.client.verify = cert_file.resolve()
         self.client.stream = True
         self.client.get(LOGIN_ENDPOINT, headers=headers)
 
